@@ -71,7 +71,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Users\Daniel\Desktop\VFX\GraphicsEngine\SDL2-2.30.1\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\Daniel\Desktop\VFX\GraphicsEngine\OpenGLEngine\include;C:\Users\Daniel\Desktop\VFX\GraphicsEngine\SDL2-2.30.1\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Users\Daniel\Desktop\VFX\GraphicsEngine\SDL2-2.30.1\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -133,6 +133,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="glad.c" />
     <ClCompile Include="OpenGLEngine.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

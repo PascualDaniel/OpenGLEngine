@@ -1,6 +1,6 @@
-
 #include <iostream>
 #include <SDL.h>
+#include <glad/glad.h>
 
 //Globals
 int gScreenHeight = 480;
@@ -9,6 +9,13 @@ SDL_Window* gGraphicsApplicationWindow = nullptr;
 SDL_GLContext gOpenGLContext = nullptr;
 
 bool gQuit = false; //Si true, cierra la app
+
+void GetOpenGLVersionInfo(){
+    std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
+    std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
+    std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
+    std::cout << "Shading Lenguage: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+}
 
 
 void InitialiceProgram() {
@@ -26,7 +33,7 @@ void InitialiceProgram() {
     //Precision de profundidad y Overlap
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
-
+    //Crear Ventana
     gGraphicsApplicationWindow =  SDL_CreateWindow("OpenGl Window",
         0, 0,
         gScreenHeight, gScreenWidth,
@@ -35,11 +42,17 @@ void InitialiceProgram() {
         std::cout << "Error: SDL_Window was not able to create" << std::endl;
         exit(1);
     }
-
+    //Crear contexto
     gOpenGLContext = SDL_GL_CreateContext(gGraphicsApplicationWindow);
     if (gOpenGLContext == nullptr) {
         std::cout << "Error: SDL_GLContex was not available" << std::endl;
-        exit(0);
+        exit(1);
+    }
+
+    //initialize GLAD
+    if (!gladLoadGLLoader(SDL_GL_GetProcAddress)) {
+        std::cout << "Error: GLAD was not initialized" << std::endl;
+        exit(1);
     }
 
 }
