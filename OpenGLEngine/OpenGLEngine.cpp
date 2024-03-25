@@ -1,6 +1,7 @@
 #include <iostream>
 #include <SDL.h>
 #include <glad/glad.h>
+#include <vector>
 
 //Globals
 int gScreenHeight = 480;
@@ -9,6 +10,16 @@ SDL_Window* gGraphicsApplicationWindow = nullptr;
 SDL_GLContext gOpenGLContext = nullptr;
 
 bool gQuit = false; //Si true, cierra la app
+
+//Vertex array object VAO
+GLuint gVertexArrayObject = 0;
+
+//Vertex array object VBO
+GLuint gVertexBufferObject = 0;
+
+
+
+
 
 void GetOpenGLVersionInfo(){
     std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
@@ -35,7 +46,7 @@ void InitialiceProgram() {
 
     //Crear Ventana
     gGraphicsApplicationWindow =  SDL_CreateWindow("OpenGl Window",
-        0, 0,
+        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
         gScreenHeight, gScreenWidth,
         SDL_WINDOW_OPENGL);
     if (gGraphicsApplicationWindow == nullptr) {
@@ -54,6 +65,37 @@ void InitialiceProgram() {
         std::cout << "Error: GLAD was not initialized" << std::endl;
         exit(1);
     }
+    GetOpenGLVersionInfo();
+
+}
+
+void VertexSpecification() {
+    //Lives on the CPU
+    const std::vector<GLfloat> vertexPosition{
+        // x    y     z
+        -0.8f, -0.8f, 0.0f, //Vertex 1
+        0.8f, -0.8f, 0.0f,  //Vertex 2
+        0.0f, -0.8f, 0.0f   //Vertex 3
+    };
+    //Settings things on the GPU
+    glGenVertexArrays(1, &gVertexArrayObject);
+    glBindVertexArray(gVertexArrayObject);
+
+    //Start generation VBO
+    glGenBuffers(1, &gVertexBufferObject);
+    glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObject);
+    glBufferData(GL_ARRAY_BUFFER, vertexPosition.size() * sizeof(GLfloat), vertexPosition.data(), GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+    glBindVertexArray(0);
+    glDisableVertexAttribArray(0);
+    
+
+}
+
+void CreateGraphicsPipeline() {
 
 }
 
@@ -99,6 +141,10 @@ void CleanUp() {
 int main(int argc, char* args[])
 {
     InitialiceProgram();
+
+    VertexSpecification();
+
+    CreateGraphicsPipeline();
 
     MainLoop();
 
