@@ -3,23 +3,27 @@
 #include <glad/glad.h>
 #include <vector>
 
-//Globals
+
+//=================================================Globals=================================================
+//=================================================Globals=================================================
+
+// Dimensiones de la pantalla
 int gScreenHeight = 480;
 int gScreenWidth = 640;
 SDL_Window* gGraphicsApplicationWindow = nullptr;
 SDL_GLContext gOpenGLContext = nullptr;
 
+//MainLoop Flag
 bool gQuit = false; //Si true, cierra la app
+
+// Program Object for our shaders (Graphics pipeline)
+GLuint gGraphicsPipelineShaderProgram = 0;
 
 //Vertex array object VAO
 GLuint gVertexArrayObject = 0;
 
 //Vertex array object VBO
 GLuint gVertexBufferObject = 0;
-
-// Program Object for our shaders (Graphics pipeline)
-GLuint gGraphicsPipelineShaderProgram = 0;
-
 
 //Vertex Shaders
 const std::string gVertexShaderSource =
@@ -39,6 +43,7 @@ const std::string gFragmentShaderSource =
 "   color = vec4(1.0f, 0.5f, 0.0f, 1.0f);\n"
 "}\n";
 
+//=================================================Funcionalidades=================================================
 
 void GetOpenGLVersionInfo(){
     std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
@@ -89,23 +94,26 @@ void InitialiceProgram() {
 }
 
 void VertexSpecification() {
-    //Lives on the CPU
+    //Lives on the CPU, the reiangle
     const std::vector<GLfloat> vertexPosition{
         // x    y     z
-        -0.8f, -0.8f, 0.0f, //Vertex 1
-        0.8f, -0.8f, 0.0f,  //Vertex 2
-        0.0f, 0.8f, 0.0f   //Vertex 3
+        -0.8f, -0.8f, 0.0f, //Vertex left
+        0.8f, -0.8f, 0.0f,  //Vertex rigth
+        0.0f, 0.8f, 0.0f   //Vertex top
     };
     //Settings things on the GPU
     glGenVertexArrays(1, &gVertexArrayObject);
     glBindVertexArray( gVertexArrayObject);
 
-    //Start generation VBO
+    //Genera el VBO
     glGenBuffers(1, &gVertexBufferObject);
+    //Selecciona el objeto del buffer con el que trabajaremos
     glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObject);
+    //Ponemos los datos en el array (traslada de la CPU al la GPU)
     glBufferData(GL_ARRAY_BUFFER, vertexPosition.size() * sizeof(GLfloat), vertexPosition.data(), GL_STATIC_DRAW);
-
+    //Dice a openGL como se usa la informacion
     glEnableVertexAttribArray(0);
+    //Por cada atributo especifica como se mueve por los datos
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
     glBindVertexArray(0);
@@ -114,25 +122,15 @@ void VertexSpecification() {
 
 }
 
-GLuint CompileShader(GLuint type, const std::string& shadersource) {
-    GLuint shaderObject;
-    if (type == GL_VERTEX_SHADER) {
-        shaderObject = glCreateShader(GL_VERTEX_SHADER);
-    }
-    else if(type == GL_FRAGMENT_SHADER){
-        shaderObject = glCreateShader(GL_FRAGMENT_SHADER);
-    }
-    const char* src = shadersource.c_str();
-    glShaderSource(shaderObject, 1, &src, nullptr);
-    glCompileShader(shaderObject);
-
-    return shaderObject;
+void CreateGraphicsPipeline() {
+    gGraphicsPipelineShaderProgram = CreateShaderProgram(gVertexShaderSource, gFragmentShaderSource);
 }
 
 GLuint CreateShaderProgram(const std::string& vertexshaderssource, const std::string& fragmentshadersource) {
     //Create graphics pipeline
     GLuint programObject = glCreateProgram();
 
+    //Compila los shaders
     GLuint myVertexShader = CompileShader(GL_VERTEX_SHADER, vertexshaderssource);
     GLuint myFragmentShader = CompileShader(GL_FRAGMENT_SHADER, fragmentshadersource);
 
@@ -145,13 +143,53 @@ GLuint CreateShaderProgram(const std::string& vertexshaderssource, const std::st
     //Detach Shaders
 
     return programObject;
-    
+
 }
 
-void CreateGraphicsPipeline() {
+GLuint CompileShader(GLuint type, const std::string& shadersource) {
+    GLuint shaderObject;
+    //Crea un shader dependiendo del tipo
+    if (type == GL_VERTEX_SHADER) {
+        shaderObject = glCreateShader(GL_VERTEX_SHADER);
+    }
+    else if(type == GL_FRAGMENT_SHADER){
+        shaderObject = glCreateShader(GL_FRAGMENT_SHADER);
+    }
+    const char* src = shadersource.c_str();
+    glShaderSource(shaderObject, 1, &src, nullptr);
+    glCompileShader(shaderObject);
 
-    gGraphicsPipelineShaderProgram = CreateShaderProgram(gVertexShaderSource, gFragmentShaderSource);
+    //Devuelve el resultado de la compilación
+    int result;
+    //Devolver el estatus
+    glGetShaderiv(shaderObject, GL_COMPILE_STATUS, &result);
+
+    if (result == GL_FALSE) {
+        int length;
+        glGetShaderiv(shaderObject, GL_INFO_LOG_LENGTH, &length);
+        char* errorMessages = new char[length]; //Se puede usar alloca aqui
+        glGetShaderInfoLog(shaderObject, length, &length, errorMessages);
+
+        if (type == GL_VERTEX_SHADER) {
+            std::cout << "Error: GL_VERTEX_SHADER compilation failed.\n" << errorMessages <<  std::endl;
+        }else if (type == GL_FRAGMENT_SHADER) {
+            std::cout << "Error: GL_FRAGMENT_SHADER compilation failed.\n" << errorMessages <<  std::endl;
+        }
+        //Reclaim memory
+        delete[] errorMessages;
+
+        //Delete broken shaders
+        glDeleteShader(shaderObject);
+
+        return 0;
+    }
+
+    return shaderObject;
 }
+
+
+
+
 
 void Input() {
     SDL_Event e;
@@ -205,19 +243,21 @@ void CleanUp() {
 
 int main(int argc, char* args[])
 {
+    //1. Inicializar el programa de graficos
     InitialiceProgram();
-
+    //2. Inicializar la jometria
     VertexSpecification();
-
+    //3. Crear la graphics pipeline
+    // Vertex y fragment shader como minimo
     CreateGraphicsPipeline();
-
+    //4. La funcionalidad de la aplicacion (Dibujo)
     MainLoop();
-
+    //5. Limpieza de funciones
     CleanUp();
 
 
 
-    std::cout << "Hola!\n";
+    std::cout << "Sacabo!\n";
     return 0;
 
 }
