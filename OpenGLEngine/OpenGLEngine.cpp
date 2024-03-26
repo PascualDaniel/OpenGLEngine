@@ -122,8 +122,46 @@ void VertexSpecification() {
 
 }
 
-void CreateGraphicsPipeline() {
-    gGraphicsPipelineShaderProgram = CreateShaderProgram(gVertexShaderSource, gFragmentShaderSource);
+GLuint CompileShader(GLuint type, const std::string& shadersource) {
+    GLuint shaderObject;
+    //Crea un shader dependiendo del tipo
+    if (type == GL_VERTEX_SHADER) {
+        shaderObject = glCreateShader(GL_VERTEX_SHADER);
+    }
+    else if (type == GL_FRAGMENT_SHADER) {
+        shaderObject = glCreateShader(GL_FRAGMENT_SHADER);
+    }
+    const char* src = shadersource.c_str();
+    glShaderSource(shaderObject, 1, &src, nullptr);
+    glCompileShader(shaderObject);
+
+    //Devuelve el resultado de la compilación
+    int result;
+    //Devolver el estatus
+    glGetShaderiv(shaderObject, GL_COMPILE_STATUS, &result);
+
+    if (result == GL_FALSE) {
+        int length;
+        glGetShaderiv(shaderObject, GL_INFO_LOG_LENGTH, &length);
+        char* errorMessages = new char[length]; //Se puede usar alloca aqui
+        glGetShaderInfoLog(shaderObject, length, &length, errorMessages);
+
+        if (type == GL_VERTEX_SHADER) {
+            std::cout << "Error: GL_VERTEX_SHADER compilation failed.\n" << errorMessages << std::endl;
+        }
+        else if (type == GL_FRAGMENT_SHADER) {
+            std::cout << "Error: GL_FRAGMENT_SHADER compilation failed.\n" << errorMessages << std::endl;
+        }
+        //Reclaim memory
+        delete[] errorMessages;
+
+        //Delete broken shaders
+        glDeleteShader(shaderObject);
+
+        return 0;
+    }
+
+    return shaderObject;
 }
 
 GLuint CreateShaderProgram(const std::string& vertexshaderssource, const std::string& fragmentshadersource) {
@@ -146,50 +184,13 @@ GLuint CreateShaderProgram(const std::string& vertexshaderssource, const std::st
 
 }
 
-GLuint CompileShader(GLuint type, const std::string& shadersource) {
-    GLuint shaderObject;
-    //Crea un shader dependiendo del tipo
-    if (type == GL_VERTEX_SHADER) {
-        shaderObject = glCreateShader(GL_VERTEX_SHADER);
-    }
-    else if(type == GL_FRAGMENT_SHADER){
-        shaderObject = glCreateShader(GL_FRAGMENT_SHADER);
-    }
-    const char* src = shadersource.c_str();
-    glShaderSource(shaderObject, 1, &src, nullptr);
-    glCompileShader(shaderObject);
 
-    //Devuelve el resultado de la compilación
-    int result;
-    //Devolver el estatus
-    glGetShaderiv(shaderObject, GL_COMPILE_STATUS, &result);
 
-    if (result == GL_FALSE) {
-        int length;
-        glGetShaderiv(shaderObject, GL_INFO_LOG_LENGTH, &length);
-        char* errorMessages = new char[length]; //Se puede usar alloca aqui
-        glGetShaderInfoLog(shaderObject, length, &length, errorMessages);
 
-        if (type == GL_VERTEX_SHADER) {
-            std::cout << "Error: GL_VERTEX_SHADER compilation failed.\n" << errorMessages <<  std::endl;
-        }else if (type == GL_FRAGMENT_SHADER) {
-            std::cout << "Error: GL_FRAGMENT_SHADER compilation failed.\n" << errorMessages <<  std::endl;
-        }
-        //Reclaim memory
-        delete[] errorMessages;
 
-        //Delete broken shaders
-        glDeleteShader(shaderObject);
-
-        return 0;
-    }
-
-    return shaderObject;
+void CreateGraphicsPipeline() {
+    gGraphicsPipelineShaderProgram = CreateShaderProgram(gVertexShaderSource, gFragmentShaderSource);
 }
-
-
-
-
 
 void Input() {
     SDL_Event e;
