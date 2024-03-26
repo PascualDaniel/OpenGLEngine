@@ -17,8 +17,27 @@ GLuint gVertexArrayObject = 0;
 //Vertex array object VBO
 GLuint gVertexBufferObject = 0;
 
+// Program Object for our shaders (Graphics pipeline)
+GLuint gGraphicsPipelineShaderProgram = 0;
 
 
+//Vertex Shaders
+const std::string gVertexShaderSource =
+"#version 410 core \n"
+"in vec4 position;\n"
+"void main()\n"
+"{\n"
+"   gl_Position = vec4(position.x,position.y, position.z, position.w);\n"
+"}\n";
+
+//Fragment Shaders, Se ejecuta una vez por fragment, dice de que color se pone por pantalla
+const std::string gFragmentShaderSource =
+"#version 410 core \n"
+"out vec4 color;\n"
+"void main()\n"
+"{\n"
+"   color = vec4(1.0f, 0.5f, 0.0f, 1.0f);\n"
+"}\n";
 
 
 void GetOpenGLVersionInfo(){
@@ -47,7 +66,7 @@ void InitialiceProgram() {
     //Crear Ventana
     gGraphicsApplicationWindow =  SDL_CreateWindow("OpenGl Window",
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-        gScreenHeight, gScreenWidth,
+        gScreenWidth, gScreenHeight,
         SDL_WINDOW_OPENGL);
     if (gGraphicsApplicationWindow == nullptr) {
         std::cout << "Error: SDL_Window was not able to create" << std::endl;
@@ -75,11 +94,11 @@ void VertexSpecification() {
         // x    y     z
         -0.8f, -0.8f, 0.0f, //Vertex 1
         0.8f, -0.8f, 0.0f,  //Vertex 2
-        0.0f, -0.8f, 0.0f   //Vertex 3
+        0.0f, 0.8f, 0.0f   //Vertex 3
     };
     //Settings things on the GPU
     glGenVertexArrays(1, &gVertexArrayObject);
-    glBindVertexArray(gVertexArrayObject);
+    glBindVertexArray( gVertexArrayObject);
 
     //Start generation VBO
     glGenBuffers(1, &gVertexBufferObject);
@@ -95,8 +114,43 @@ void VertexSpecification() {
 
 }
 
+GLuint CompileShader(GLuint type, const std::string& shadersource) {
+    GLuint shaderObject;
+    if (type == GL_VERTEX_SHADER) {
+        shaderObject = glCreateShader(GL_VERTEX_SHADER);
+    }
+    else if(type == GL_FRAGMENT_SHADER){
+        shaderObject = glCreateShader(GL_FRAGMENT_SHADER);
+    }
+    const char* src = shadersource.c_str();
+    glShaderSource(shaderObject, 1, &src, nullptr);
+    glCompileShader(shaderObject);
+
+    return shaderObject;
+}
+
+GLuint CreateShaderProgram(const std::string& vertexshaderssource, const std::string& fragmentshadersource) {
+    //Create graphics pipeline
+    GLuint programObject = glCreateProgram();
+
+    GLuint myVertexShader = CompileShader(GL_VERTEX_SHADER, vertexshaderssource);
+    GLuint myFragmentShader = CompileShader(GL_FRAGMENT_SHADER, fragmentshadersource);
+
+    glAttachShader(programObject, myVertexShader);
+    glAttachShader(programObject, myFragmentShader);
+    glLinkProgram(programObject);
+
+    //Validate
+    glValidateProgram(programObject);
+    //Detach Shaders
+
+    return programObject;
+    
+}
+
 void CreateGraphicsPipeline() {
 
+    gGraphicsPipelineShaderProgram = CreateShaderProgram(gVertexShaderSource, gFragmentShaderSource);
 }
 
 void Input() {
@@ -110,11 +164,22 @@ void Input() {
     }
 }
 void PreDraw() {
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
 
+    glViewport(0, 0, gScreenWidth, gScreenHeight);
+    glClearColor(1.f, 1.f, 0.1f, 1.f);
+
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    
+    glUseProgram(gGraphicsPipelineShaderProgram);
 }
 
 void Draw() {
+    glBindVertexArray(gVertexArrayObject);
+    glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObject);
 
+    glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
 void MainLoop() {
