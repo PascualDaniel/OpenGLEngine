@@ -27,6 +27,7 @@ GLuint gVertexArrayObject = 0;
 
 //Vertex array object VBO
 GLuint gVertexBufferObject = 0;
+GLuint gVertexBufferObject2 = 0;
 
 
 //=================================================Funcionalidades=================================================
@@ -105,6 +106,12 @@ void VertexSpecification() {
         0.8f, -0.8f, 0.0f,  //Vertex rigth
         0.0f, 0.8f, 0.0f   //Vertex top
     };
+    const std::vector<GLfloat> vertexColors{
+        // x    y     z
+        1.0f, 0.0f, 0.0f, //Vertex left
+        0.0f, 1.0f, 0.0f,  //Vertex rigth
+        0.0f, 0.0f, 1.0f   //Vertex top
+    };
     //Settings things on the GPU
     glGenVertexArrays(1, &gVertexArrayObject);
     glBindVertexArray( gVertexArrayObject);
@@ -115,13 +122,26 @@ void VertexSpecification() {
     glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObject);
     //Ponemos los datos en el array (traslada de la CPU al la GPU)
     glBufferData(GL_ARRAY_BUFFER, vertexPosition.size() * sizeof(GLfloat), vertexPosition.data(), GL_STATIC_DRAW);
+    
     //Dice a openGL como se usa la informacion
     glEnableVertexAttribArray(0);
     //Por cada atributo especifica como se mueve por los datos
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
+
+    //Poner los colores colores
+    glGenBuffers(1, &gVertexBufferObject2);
+    glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObject2);
+    glBufferData(GL_ARRAY_BUFFER, vertexColors.size() * sizeof(GLfloat), vertexColors.data(), GL_STATIC_DRAW);
+    //Linkearlos al VAO
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+
     glBindVertexArray(0);
+    //Descativar atributos
     glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
     
 
 }
