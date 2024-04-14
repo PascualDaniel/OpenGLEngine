@@ -102,11 +102,19 @@ void VertexSpecification() {
     //Lives on the CPU, the reiangle
     const std::vector<GLfloat> vertexData{
         // x    y     z
-        -0.8f, -0.8f, 0.0f, //Vertex left
+        //first triangle
+        -0.5f, -0.5f, 0.0f, //Vertex left
         1.0f, 0.0f, 0.0f,   //Color1
-        0.8f, -0.8f, 0.0f,  //Vertex rigth
+        0.5f, -0.5f, 0.0f,  //Vertex rigth
         0.0f, 1.0f, 0.0f,   //Color2
-        0.0f, 0.8f, 0.0f,   //Vertex top
+        -0.5f, 0.5f, 0.0f,   //Vertex top
+        0.0f, 0.0f, 1.0f,    //Color3
+        //second triangle
+        0.5f, -0.5f, 0.0f, //Vertex left
+        0.0f, 1.0f, 0.0f,   //Color1
+        0.5f, 0.5f, 0.0f,  //Vertex rigth
+        0.0f, 0.0f, 1.0f,   //Color2
+        -0.5f, 0.5f, 0.0f,   //Vertex top
         0.0f, 0.0f, 1.0f    //Color3
     };
    
@@ -235,7 +243,7 @@ void Draw() {
     //Selecciona el objeto a activar
     glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObject);
     //Renderiza lso datos
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 
     //Para de usar el pipeline (Necesario si solo hay un pipeline)
     glUseProgram(0);
