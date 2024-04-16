@@ -28,8 +28,29 @@ GLuint gVertexArrayObject = 0;
 //Vertex array object VBO
 GLuint gVertexBufferObject = 0;
 
+// Index Buffer Object IBO
+GLuint gIndexBufferObject = 0;
 
 
+//=================================================Errores=================================================
+
+static void GLClearAllErrors() {
+    while (glGetError() != GL_NO_ERROR) {
+
+    }
+}
+
+static bool GLCheckErrorStatus(const char* function, int line) {
+    while (GLenum error = glGetError()) {
+        std::cout << "OpenGL Error: " << error
+            <<"\tLine: " << line
+            <<"\tFunction: " << function
+            << std::endl;
+        return true;
+    }
+    return false;
+}
+#define GLCheck(x) GLClearAllErrors(); x;  GLCheckErrorStatus(#x,__LINE__);
 //=================================================Funcionalidades=================================================
 
 std::string LoadShaderAsString(const std::string& filename) {
@@ -102,25 +123,24 @@ void VertexSpecification() {
     //Lives on the CPU, the reiangle
     const std::vector<GLfloat> vertexData{
         // x    y     z
-        //first triangle
+        //0-Vertex
         -0.5f, -0.5f, 0.0f, //Vertex left
         1.0f, 0.0f, 0.0f,   //Color1
+        //1-Vertex
         0.5f, -0.5f, 0.0f,  //Vertex rigth
         0.0f, 1.0f, 0.0f,   //Color2
+        //2-Vertex
         -0.5f, 0.5f, 0.0f,   //Vertex top
         0.0f, 0.0f, 1.0f,    //Color3
-        //second triangle
-        0.5f, -0.5f, 0.0f, //Vertex left
-        0.0f, 1.0f, 0.0f,   //Color1
+        //3-Vertex
         0.5f, 0.5f, 0.0f,  //Vertex rigth
-        0.0f, 0.0f, 1.0f,   //Color2
-        -0.5f, 0.5f, 0.0f,   //Vertex top
-        0.0f, 0.0f, 1.0f    //Color3
+        0.0f, 0.0f, 1.0f   //Color2
+
     };
-   
+
     //Settings things on the GPU
     glGenVertexArrays(1, &gVertexArrayObject);
-    glBindVertexArray( gVertexArrayObject);
+    glBindVertexArray(gVertexArrayObject);
 
     //Genera el VBO
     glGenBuffers(1, &gVertexBufferObject);
@@ -128,7 +148,16 @@ void VertexSpecification() {
     glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObject);
     //Ponemos los datos en el array (traslada de la CPU al la GPU)
     glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(GLfloat), vertexData.data(), GL_STATIC_DRAW);
-    
+
+
+    const std::vector<GLuint> indexBufferData{ 2,0,1,3,2,1 };
+    //Crear el Index Buffer Object (IBO i.e. EBO)
+    glGenBuffers(1, &gIndexBufferObject);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gIndexBufferObject);
+    // Poblar el Index Bufer
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferData.size() * sizeof(GLuint), indexBufferData.data(), GL_STATIC_DRAW);
+
+
     //Dice a openGL como se usa la informacion
     glEnableVertexAttribArray(0);
     //Por cada atributo especifica como se mueve por los datos
@@ -243,7 +272,8 @@ void Draw() {
     //Selecciona el objeto a activar
     glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObject);
     //Renderiza lso datos
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    //glDrawArrays(GL_TRIANGLES, 0, 6);
+    GLCheck(glDrawElements(GL_TRIANGLES, 6,GL_UNSIGNED_INT,0));
 
     //Para de usar el pipeline (Necesario si solo hay un pipeline)
     glUseProgram(0);
