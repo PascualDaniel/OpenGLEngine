@@ -318,7 +318,7 @@ int main(int argc, char* args[])
 
 
 
-    std::cout << "Sacabo!\n";
+    std::cout << "Fin!\n";
     return 0;
 
 }
