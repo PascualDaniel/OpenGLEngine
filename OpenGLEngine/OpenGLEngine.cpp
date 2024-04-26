@@ -33,6 +33,8 @@ GLuint gVertexBufferObject = 0;
 // Index Buffer Object IBO
 GLuint gIndexBufferObject = 0;
 
+float g_uOffset = 0.0f;
+
 
 //=================================================Errores=================================================
 
@@ -255,6 +257,18 @@ void Input() {
             gQuit = true;
         }
     }
+
+    const Uint8* state = SDL_GetKeyboardState(NULL);
+    if (state[SDL_SCANCODE_UP]) {
+        g_uOffset += 0.01f;
+        std::cout << "g_uOffset: " << g_uOffset << std::endl;
+
+    }if (state[SDL_SCANCODE_DOWN]) {
+        g_uOffset -= 0.01f;
+        std::cout << "g_uOffset: " << g_uOffset << std::endl;
+    }
+
+
 }
 void PreDraw() {
     glDisable(GL_DEPTH_TEST);
@@ -266,6 +280,14 @@ void PreDraw() {
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     
     glUseProgram(gGraphicsPipelineShaderProgram);
+    GLint location = glGetUniformLocation(gGraphicsPipelineShaderProgram, "u_Offset");
+    if (location >= 0) {
+        std::cout << "Location of u_Offset: " << location << std::endl;
+        glUniform1f(location,g_uOffset);
+    }
+    else {
+        std::cout << "Could not find u_Offset "  << std::endl;
+    }
 }
 
 void Draw() {
@@ -282,25 +304,20 @@ void Draw() {
 }
 
 void MainLoop() {
-    while (!gQuit) {
-        
+    while (!gQuit) {    
         Input();
         //Todo lo que OpenGl necesita antes de dibujar
         PreDraw();
         // El dibujo
         Draw();
-
         //Actualiza la pantalla
         SDL_GL_SwapWindow(gGraphicsApplicationWindow);
-
     }
-
 }
 
 void CleanUp() {
     SDL_DestroyWindow(gGraphicsApplicationWindow);
     SDL_Quit();
-
 }
 
 
