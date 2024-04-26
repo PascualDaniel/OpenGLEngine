@@ -8,6 +8,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/mat4x4.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 //=================================================Globals=================================================
 //=================================================Globals=================================================
@@ -33,7 +34,8 @@ GLuint gVertexBufferObject = 0;
 // Index Buffer Object IBO
 GLuint gIndexBufferObject = 0;
 
-float g_uOffset = 0.0f;
+
+float g_uOffset = 1.0f;
 
 
 //=================================================Errores=================================================
@@ -280,13 +282,21 @@ void PreDraw() {
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     
     glUseProgram(gGraphicsPipelineShaderProgram);
-    GLint location = glGetUniformLocation(gGraphicsPipelineShaderProgram, "u_Offset");
-    if (location >= 0) {
-        std::cout << "Location of u_Offset: " << location << std::endl;
-        glUniform1f(location,g_uOffset);
+   
+
+    glm::mat4 translate = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, g_uOffset, 0.0f));
+
+    //Devuelve la localizacion de la matriz
+    GLint u_ModelMatrixLocation = glGetUniformLocation(gGraphicsPipelineShaderProgram, "u_ModelMatrix");
+
+
+    if (u_ModelMatrixLocation >= 0) {
+       
+        glUniformMatrix4fv(u_ModelMatrixLocation, 1, GL_FALSE, &translate[0][0]);
     }
     else {
-        std::cout << "Could not find u_Offset "  << std::endl;
+        std::cout << "Could not find u_ModelMatrix "  << std::endl;
+        exit(EXIT_FAILURE);
     }
 }
 

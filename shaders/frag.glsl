@@ -4,7 +4,7 @@ in vec3 v_vertexColors;
 
 out vec4 color;
 
-uniform float u_Offset; // uniform variable
+uniform mat4 u_ModelMatrix;
 
 
 void main()
