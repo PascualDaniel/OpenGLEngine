@@ -9,6 +9,7 @@
 #include <glm/glm.hpp>
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/matrix_transform.hpp> 
 
 //=================================================Globals=================================================
 //=================================================Globals=================================================
@@ -35,7 +36,7 @@ GLuint gVertexBufferObject = 0;
 GLuint gIndexBufferObject = 0;
 
 
-float g_uOffset = 1.0f;
+float g_uOffset = 0.0f;
 
 
 //=================================================Errores=================================================
@@ -283,21 +284,39 @@ void PreDraw() {
     
     glUseProgram(gGraphicsPipelineShaderProgram);
    
-
-    glm::mat4 translate = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, g_uOffset, 0.0f));
+    //Model Transformation 
+    glm::mat4 translate = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, g_uOffset-1));
 
     //Devuelve la localizacion de la matriz
     GLint u_ModelMatrixLocation = glGetUniformLocation(gGraphicsPipelineShaderProgram, "u_ModelMatrix");
 
 
-    if (u_ModelMatrixLocation >= 0) {
-       
+    if (u_ModelMatrixLocation >= 0) {      
         glUniformMatrix4fv(u_ModelMatrixLocation, 1, GL_FALSE, &translate[0][0]);
     }
     else {
         std::cout << "Could not find u_ModelMatrix "  << std::endl;
         exit(EXIT_FAILURE);
     }
+
+    //Projection Transformation 
+    glm::mat4 perspective = glm::perspective(glm::radians(45.0f),
+                                            (float)gScreenWidth/(float)gScreenHeight,
+                                            0.1f,
+                                            10.0f);
+
+    //Devuelve la localizacion de la perspectiva
+    GLint u_ProjectionLocation = glGetUniformLocation(gGraphicsPipelineShaderProgram, "u_Projection");
+
+
+    if (u_ProjectionLocation >= 0) {
+        glUniformMatrix4fv(u_ProjectionLocation, 1, GL_FALSE, &perspective[0][0]);
+    }
+    else {
+        std::cout << "Could not find u_Projection " << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
 }
 
 void Draw() {
