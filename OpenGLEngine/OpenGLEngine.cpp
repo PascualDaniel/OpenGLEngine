@@ -36,8 +36,9 @@ GLuint gVertexBufferObject = 0;
 GLuint gIndexBufferObject = 0;
 
 
-float g_uOffset = 0.0f;
+float g_uOffset = -2.0f;
 float g_uRotate = 0.0f;
+float g_uScale  = 0.5f;
 
 
 //=================================================Errores=================================================
@@ -272,11 +273,11 @@ void Input() {
         std::cout << "g_uOffset: " << g_uOffset << std::endl;
     }
     if (state[SDL_SCANCODE_LEFT]) {
-        g_uRotate += 0.1f;
+        g_uRotate += 0.5f;
         std::cout << "g_uRotate: " << g_uRotate << std::endl;
 
     }if (state[SDL_SCANCODE_RIGHT]) {
-        g_uRotate -= 0.1f;
+        g_uRotate -= 0.5f;
         std::cout << "g_uRotate: " << g_uRotate << std::endl;
     }
 
@@ -294,9 +295,11 @@ void PreDraw() {
     glUseProgram(gGraphicsPipelineShaderProgram);
    
     //Model Transformation 
-    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, g_uOffset-1));
+    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, g_uOffset));
 
+    //aplica rotacion y escala
     model = glm::rotate(model, glm::radians(g_uRotate), glm::vec3(0.0f, 1.0f, 0.0f));
+    model = glm::scale(model,  glm::vec3(g_uScale, g_uScale, g_uScale));
 
     //Devuelve la localizacion de la matriz
     GLint u_ModelMatrixLocation = glGetUniformLocation(gGraphicsPipelineShaderProgram, "u_ModelMatrix");
