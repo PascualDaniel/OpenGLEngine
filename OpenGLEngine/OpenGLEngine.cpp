@@ -9,7 +9,7 @@
 #include <glm/glm.hpp>
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/matrix_transform.hpp> 
+
 
 //=================================================Globals=================================================
 //=================================================Globals=================================================
@@ -37,6 +37,7 @@ GLuint gIndexBufferObject = 0;
 
 
 float g_uOffset = 0.0f;
+float g_uRotate = 0.0f;
 
 
 //=================================================Errores=================================================
@@ -270,6 +271,14 @@ void Input() {
         g_uOffset -= 0.01f;
         std::cout << "g_uOffset: " << g_uOffset << std::endl;
     }
+    if (state[SDL_SCANCODE_LEFT]) {
+        g_uRotate += 0.1f;
+        std::cout << "g_uRotate: " << g_uRotate << std::endl;
+
+    }if (state[SDL_SCANCODE_RIGHT]) {
+        g_uRotate -= 0.1f;
+        std::cout << "g_uRotate: " << g_uRotate << std::endl;
+    }
 
 
 }
@@ -285,14 +294,16 @@ void PreDraw() {
     glUseProgram(gGraphicsPipelineShaderProgram);
    
     //Model Transformation 
-    glm::mat4 translate = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, g_uOffset-1));
+    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, g_uOffset-1));
+
+    model = glm::rotate(model, glm::radians(g_uRotate), glm::vec3(0.0f, 1.0f, 0.0f));
 
     //Devuelve la localizacion de la matriz
     GLint u_ModelMatrixLocation = glGetUniformLocation(gGraphicsPipelineShaderProgram, "u_ModelMatrix");
 
 
     if (u_ModelMatrixLocation >= 0) {      
-        glUniformMatrix4fv(u_ModelMatrixLocation, 1, GL_FALSE, &translate[0][0]);
+        glUniformMatrix4fv(u_ModelMatrixLocation, 1, GL_FALSE, &model[0][0]);
     }
     else {
         std::cout << "Could not find u_ModelMatrix "  << std::endl;
