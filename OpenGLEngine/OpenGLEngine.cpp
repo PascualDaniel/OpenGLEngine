@@ -295,11 +295,12 @@ void PreDraw() {
     glUseProgram(gGraphicsPipelineShaderProgram);
    
     //Model Transformation 
-    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, g_uOffset));
+    
+    glm::mat4 model = glm::rotate(glm::mat4(1.0f), glm::radians(g_uRotate), glm::vec3(0.0f, 1.0f, 0.0f));
 
-    //aplica rotacion y escala
-    model = glm::rotate(model, glm::radians(g_uRotate), glm::vec3(0.0f, 1.0f, 0.0f));
-    model = glm::scale(model,  glm::vec3(g_uScale, g_uScale, g_uScale));
+    model           = glm::translate(model, glm::vec3(0.0f, 0.0f, g_uOffset));
+
+    model           = glm::scale(model,  glm::vec3(g_uScale, g_uScale, g_uScale));
 
     //Devuelve la localizacion de la matriz
     GLint u_ModelMatrixLocation = glGetUniformLocation(gGraphicsPipelineShaderProgram, "u_ModelMatrix");
@@ -336,8 +337,10 @@ void PreDraw() {
 void Draw() {
     //Activa atributos
     glBindVertexArray(gVertexArrayObject);
+
     //Selecciona el objeto a activar
-    glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObject);
+    //glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObject);
+
     //Renderiza lso datos
     //glDrawArrays(GL_TRIANGLES, 0, 6);
     GLCheck(glDrawElements(GL_TRIANGLES, 6,GL_UNSIGNED_INT,0));
