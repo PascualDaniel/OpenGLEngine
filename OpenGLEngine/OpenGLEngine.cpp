@@ -1,14 +1,23 @@
+//=================================================Estandar=================================================
+//=================================================Estandar=================================================
 #include <iostream>
 #include <vector>
 #include <string>
 #include <fstream>
 
+
+//=================================================Externas=================================================
+//=================================================Externas=================================================
 #include <SDL.h>
 #include <glad/glad.h>
 
 #include <glm/glm.hpp>
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
+//=================================================Propias=================================================
+//=================================================Propias=================================================
+#include "Camera.hpp"
 
 
 //=================================================Globals=================================================
@@ -39,6 +48,9 @@ GLuint gIndexBufferObject = 0;
 float g_uOffset = -2.0f;
 float g_uRotate = 0.0f;
 float g_uScale  = 0.5f;
+
+//Camara global Unica
+Camera gCamera;
 
 
 //=================================================Errores=================================================
@@ -263,22 +275,38 @@ void Input() {
         }
     }
 
+    
     const Uint8* state = SDL_GetKeyboardState(NULL);
+
+
+    float speed = 0.1f;
     if (state[SDL_SCANCODE_UP]) {
+        std::cout << "fORWA: " << std::endl;
+        gCamera.MoveForward(speed);
+
+    }
+    if (state[SDL_SCANCODE_DOWN]) {
+        std::cout << "BACKS: " << std::endl;
+        gCamera.MoveBackward(speed);
+
+    }
+    if (state[SDL_SCANCODE_LEFT]) {
+        gCamera.MoveLeft(speed);
+        
+
+    }
+    if (state[SDL_SCANCODE_RIGHT]) {
+        gCamera.MoveRight(speed);
+     
+    }
+
+    if (state[SDL_SCANCODE_W]) {
         g_uOffset += 0.01f;
         std::cout << "g_uOffset: " << g_uOffset << std::endl;
 
-    }if (state[SDL_SCANCODE_DOWN]) {
+    }if (state[SDL_SCANCODE_S]) {
         g_uOffset -= 0.01f;
         std::cout << "g_uOffset: " << g_uOffset << std::endl;
-    }
-    if (state[SDL_SCANCODE_LEFT]) {
-        g_uRotate += 0.5f;
-        std::cout << "g_uRotate: " << g_uRotate << std::endl;
-
-    }if (state[SDL_SCANCODE_RIGHT]) {
-        g_uRotate -= 0.5f;
-        std::cout << "g_uRotate: " << g_uRotate << std::endl;
     }
 
 
@@ -294,23 +322,35 @@ void PreDraw() {
     
     glUseProgram(gGraphicsPipelineShaderProgram);
    
+
+   
+
+    g_uRotate += 0.5f;
+    //std::cout << "g_uRotate: " << g_uRotate << std::endl;
+
     //Model Transformation 
-    
-    glm::mat4 model = glm::rotate(glm::mat4(1.0f), glm::radians(g_uRotate), glm::vec3(0.0f, 1.0f, 0.0f));
-
-    model           = glm::translate(model, glm::vec3(0.0f, 0.0f, g_uOffset));
-
+    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, g_uOffset));
+    model           = glm::rotate(model, glm::radians(g_uRotate), glm::vec3(0.0f, 1.0f, 0.0f));
     model           = glm::scale(model,  glm::vec3(g_uScale, g_uScale, g_uScale));
 
     //Devuelve la localizacion de la matriz
     GLint u_ModelMatrixLocation = glGetUniformLocation(gGraphicsPipelineShaderProgram, "u_ModelMatrix");
-
-
     if (u_ModelMatrixLocation >= 0) {      
         glUniformMatrix4fv(u_ModelMatrixLocation, 1, GL_FALSE, &model[0][0]);
     }
     else {
         std::cout << "Could not find u_ModelMatrix "  << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    // Camara
+    glm::mat4 view = gCamera.GetViewMatrix();
+    GLint u_ViewLocation = glGetUniformLocation(gGraphicsPipelineShaderProgram, "u_ViewMatrix");
+    if (u_ViewLocation >= 0) {
+        glUniformMatrix4fv(u_ViewLocation, 1, GL_FALSE, &view[0][0]);
+    }
+    else {
+        std::cout << "Could not find u_ViewMatrix " << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -322,8 +362,6 @@ void PreDraw() {
 
     //Devuelve la localizacion de la perspectiva
     GLint u_ProjectionLocation = glGetUniformLocation(gGraphicsPipelineShaderProgram, "u_Projection");
-
-
     if (u_ProjectionLocation >= 0) {
         glUniformMatrix4fv(u_ProjectionLocation, 1, GL_FALSE, &perspective[0][0]);
     }
