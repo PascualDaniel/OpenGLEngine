@@ -266,12 +266,20 @@ void CreateGraphicsPipeline() {
 }
 
 void Input() {
+    static int mouseX = gScreenWidth  / 2;
+    static int mouseY = gScreenHeight / 2; 
+
     SDL_Event e;
 
     while (SDL_PollEvent(&e) != 0) {
         if (e.type == SDL_QUIT) {
             std::cout << "Bye :3" << std::endl;
             gQuit = true;
+        }
+        else if (e.type == SDL_MOUSEMOTION) {
+            mouseX += e.motion.xrel;
+            mouseY += e.motion.yrel;
+            gCamera.MouseLook(mouseX, mouseY);
         }
     }
 
@@ -307,6 +315,11 @@ void Input() {
     }if (state[SDL_SCANCODE_S]) {
         g_uOffset -= 0.01f;
         std::cout << "g_uOffset: " << g_uOffset << std::endl;
+    }
+
+    if (state[SDL_SCANCODE_ESCAPE]) {
+        std::cout << "Bye :3" << std::endl;
+        gQuit = true;
     }
 
 
@@ -388,6 +401,10 @@ void Draw() {
 }
 
 void MainLoop() {
+    //Encerrrar al raton dentro de la pantalla
+    SDL_WarpMouseInWindow(gGraphicsApplicationWindow, gScreenWidth / 2, gScreenHeight / 2);
+    SDL_SetRelativeMouseMode(SDL_TRUE);
+
     while (!gQuit) {    
         Input();
         //Todo lo que OpenGl necesita antes de dibujar
