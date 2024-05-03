@@ -108,12 +108,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\Daniel\Desktop\VFX\GraphicsEngine\OpenGLEngine\OpenGLEngine\Shaders;C:\Users\Daniel\Desktop\VFX\GraphicsEngine\OpenGLEngine\OpenGLEngine\Camera;C:\Users\Daniel\Desktop\VFX\GraphicsEngine\OpenGLEngine\include\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Daniel\Desktop\VFX\GraphicsEngine\OpenGLEngine\OpenGLEngine\Camera;C:\Users\Daniel\Desktop\VFX\GraphicsEngine\OpenGLEngine\OpenGLEngine\Textures;C:\Users\Daniel\Desktop\VFX\GraphicsEngine\OpenGLEngine\OpenGLEngine\Shaders;C:\Users\Daniel\Desktop\VFX\GraphicsEngine\OpenGLEngine\include\glad;C:\Users\Daniel\Desktop\VFX\GraphicsEngine\OpenGLEngine\include\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\Daniel\Desktop\VFX\GraphicsEngine\SDL2-2.30.1\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\Daniel\Desktop\VFX\GraphicsEngine\OpenGLEngine\include\stb\stb_image.h;C:\Users\Daniel\Desktop\VFX\GraphicsEngine\OpenGLEngine\include\stb;C:\Users\Daniel\Desktop\VFX\GraphicsEngine\SDL2-2.30.1\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

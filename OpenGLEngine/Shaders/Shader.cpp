@@ -9,15 +9,16 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath) {
 }
 
 void Shader::use() {
-    // Use the shader program
+    glUseProgram(gGraphicsPipeline);
 }
 
 void Shader::setInt(const std::string& name, int value) {
-    // Set the int uniform
+    glUniform1i(glGetUniformLocation(gGraphicsPipeline, name.c_str()), value);
 }
 
 void Shader::setFloat(const std::string& name, float value) {
-    // Set the float uniform
+    glUniform1f(glGetUniformLocation(gGraphicsPipeline, name.c_str()), value);
+
 }
 
 GLuint Shader::getGraphicsPipeline() {

@@ -15,12 +15,17 @@
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 //=================================================Propias=================================================
 //=================================================Propias=================================================
 #include "Camera.hpp"
 
 #include "Shader.hpp"
 
+#include "Texture.hpp"
 
 //=================================================Globals=================================================
 //=================================================Globals=================================================
@@ -55,6 +60,7 @@ float g_uScale  = 0.5f;
 Camera gCamera;
 
 
+
 //=================================================Errores=================================================
 
 static void GLClearAllErrors() {
@@ -83,6 +89,7 @@ void GetOpenGLVersionInfo(){
     std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
     std::cout << "Shading Lenguage: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
 }
+
 
 
 void InitialiceProgram() {
@@ -125,24 +132,45 @@ void InitialiceProgram() {
 
 }
 
+void CreateTexture(GLuint& texture) {
+    //importar la imagen
+    int widthImg, heightImg, numColCh;
+    unsigned char* bytes = stbi_load("C:/Users/Daniel/Desktop/VFX/GraphicsEngine/OpenGLEngine/textures/container.jpg", &widthImg, &heightImg, &numColCh, 0);
+    //crea la textura
+    glGenTextures(1, &texture);
+    //la enlaza
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    //tipo de interpolacion 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    //tipo de repeticion
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    //Puede dar error GL_RGB jpegs / GL_RGBA pngs / rgb jpg
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widthImg, heightImg, 0, GL_RGB, GL_UNSIGNED_BYTE, bytes);
+    //añade mipmaps, lo de repetir con distancia mas pequiño
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    stbi_image_free(bytes);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+}
+
+void DeleteTexture(GLuint& texture) {
+    glDeleteTextures(1, &texture);
+}
+
 void VertexSpecification() {
     //Lives on the CPU, the reiangle
-    const std::vector<GLfloat> vertexData{
-        // x    y     z
-        //0-Vertex
-        -0.5f, -0.5f, 0.0f, //Vertex left
-        1.0f, 0.0f, 0.0f,   //Color1
-        //1-Vertex
-        0.5f, -0.5f, 0.0f,  //Vertex rigth
-        0.0f, 1.0f, 0.0f,   //Color2
-        //2-Vertex
-        -0.5f, 0.5f, 0.0f,   //Vertex top
-        0.0f, 0.0f, 1.0f,    //Color3
-        //3-Vertex
-        0.5f, 0.5f, 0.0f,  //Vertex rigth
-        0.0f, 0.0f, 1.0f   //Color2
-
-    };
+    const std::vector<GLfloat> vertexData
+     { //     COORDINATES     /        COLORS      /   TexCoord  //
+    -0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f,	0.0f, 0.0f, // Lower left corner
+    -0.5f,  0.5f, 0.0f,     0.0f, 1.0f, 0.0f,	0.0f, 1.0f, // Upper left corner
+     0.5f,  0.5f, 0.0f,     0.0f, 0.0f, 1.0f,	1.0f, 1.0f, // Upper right corner
+     0.5f, -0.5f, 0.0f,     1.0f, 1.0f, 1.0f,	1.0f, 0.0f  // Lower right corner
+};
 
     //Settings things on the GPU
     glGenVertexArrays(1, &gVertexArrayObject);
@@ -156,7 +184,12 @@ void VertexSpecification() {
     glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(GLfloat), vertexData.data(), GL_STATIC_DRAW);
 
 
-    const std::vector<GLuint> indexBufferData{ 2,0,1,3,2,1 };
+    const std::vector<GLuint> indexBufferData
+    {
+        0, 2, 1, // Upper triangle
+        0, 3, 2 // Lower triangle
+    };
+
     //Crear el Index Buffer Object (IBO i.e. EBO)
     glGenBuffers(1, &gIndexBufferObject);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gIndexBufferObject);
@@ -167,11 +200,17 @@ void VertexSpecification() {
     //Dice a openGL como se usa la informacion
     glEnableVertexAttribArray(0);
     //Por cada atributo especifica como se mueve por los datos
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)0);
 
     //Linkearlos al VAO
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)( sizeof(GLfloat)*3));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)( sizeof(GLfloat)*3));
+
+    
+
+    //Linkearlos al VAO
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 6));
 
     glBindVertexArray(0);
     //Descativar atributos
@@ -183,9 +222,9 @@ void VertexSpecification() {
 
 
 void CreateGraphicsPipeline() {
-    Shader shader = Shader("path/to/vertexShader.glsl", "path/to/fragmentShader.glsl");
+    Shader gShader = Shader("path/to/vertexShader.glsl", "path/to/fragmentShader.glsl");
 
-    gGraphicsPipelineShaderProgram = shader.getGraphicsPipeline();
+    gGraphicsPipelineShaderProgram = gShader.getGraphicsPipeline();
 }
 
 void Input() {
@@ -251,9 +290,6 @@ void PreDraw() {
     
     glUseProgram(gGraphicsPipelineShaderProgram);
    
-
-   
-
     g_uRotate += 0.5f;
     //std::cout << "g_uRotate: " << g_uRotate << std::endl;
 
@@ -299,19 +335,37 @@ void PreDraw() {
         exit(EXIT_FAILURE);
     }
 
+
+    //Textura
+    GLint u_TextureLocation0 = glGetUniformLocation(gGraphicsPipelineShaderProgram, "u_Tex0");
+    if (u_TextureLocation0 >= 0) {
+        glUniform1i(u_TextureLocation0, 0);
+    }
+    else {
+        std::cout << "Could not find u_Tex0 " << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
 }
 
+
 void Draw() {
+    GLuint texture = 0;
+    CreateTexture(texture);
+    
+
     //Activa atributos
     glBindVertexArray(gVertexArrayObject);
 
     //Selecciona el objeto a activar
     //glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObject);
-
+    glBindTexture(GL_TEXTURE_2D, texture);
     //Renderiza lso datos
     //glDrawArrays(GL_TRIANGLES, 0, 6);
     GLCheck(glDrawElements(GL_TRIANGLES, 6,GL_UNSIGNED_INT,0));
 
+
+    DeleteTexture(texture);
     //Para de usar el pipeline (Necesario si solo hay un pipeline)
     glUseProgram(0);
 }
@@ -351,8 +405,6 @@ int main(int argc, char* args[])
     MainLoop();
     //5. Limpieza de funciones
     CleanUp();
-
-
 
     std::cout << "Fin!\n";
     return 0;
