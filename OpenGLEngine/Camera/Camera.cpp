@@ -35,7 +35,11 @@ void Camera::MouseLook(int mouseX, int mouseY) {
 	float sensitivity = 0.1f; // Adjust this value to your liking
 	glm::vec2 mouseDelta = sensitivity * (mOldMousePosition - currentMouse);;
 
+	glm::vec3 right = glm::cross(mViewDirection, mUpVector);
+
 	mViewDirection = glm::rotate(mViewDirection, glm::radians(mouseDelta.x), mUpVector);
+	mViewDirection = glm::rotate(mViewDirection, glm::radians(mouseDelta.y), right);
+
 
 	mOldMousePosition = currentMouse;
 }
