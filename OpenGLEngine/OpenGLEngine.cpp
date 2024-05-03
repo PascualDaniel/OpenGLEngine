@@ -288,31 +288,30 @@ void Input() {
 
 
     float speed = 0.1f;
-    if (state[SDL_SCANCODE_UP]) {
-        std::cout << "fORWA: " << std::endl;
-        gCamera.MoveForward(speed);
-
-    }
-    if (state[SDL_SCANCODE_DOWN]) {
-        std::cout << "BACKS: " << std::endl;
-        gCamera.MoveBackward(speed);
-
-    }
-    if (state[SDL_SCANCODE_LEFT]) {
-        gCamera.MoveLeft(speed);
-        
-
-    }
-    if (state[SDL_SCANCODE_RIGHT]) {
-        gCamera.MoveRight(speed);
-     
-    }
-
     if (state[SDL_SCANCODE_W]) {
+        gCamera.MoveForward(speed);
+    }
+    if (state[SDL_SCANCODE_S]) {
+        gCamera.MoveBackward(speed);
+    }
+    if (state[SDL_SCANCODE_A]) {
+        gCamera.MoveLeft(speed);    
+    }
+    if (state[SDL_SCANCODE_D]) {
+        gCamera.MoveRight(speed);    
+    }
+    if (state[SDL_SCANCODE_SPACE]) {
+        gCamera.MoveUp(speed);
+    }
+    if (state[SDL_SCANCODE_LCTRL]) {
+        gCamera.MoveDown(speed);
+    }
+
+    if (state[SDL_SCANCODE_UP]) {
         g_uOffset += 0.01f;
         std::cout << "g_uOffset: " << g_uOffset << std::endl;
 
-    }if (state[SDL_SCANCODE_S]) {
+    }if (state[SDL_SCANCODE_DOWN]) {
         g_uOffset -= 0.01f;
         std::cout << "g_uOffset: " << g_uOffset << std::endl;
     }

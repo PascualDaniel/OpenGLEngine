@@ -32,7 +32,8 @@ void Camera::MouseLook(int mouseX, int mouseY) {
 		firstLook = false;
 	}
 	
-	glm::vec2 mouseDelta = mOldMousePosition - currentMouse;
+	float sensitivity = 0.1f; // Adjust this value to your liking
+	glm::vec2 mouseDelta = sensitivity * (mOldMousePosition - currentMouse);;
 
 	mViewDirection = glm::rotate(mViewDirection, glm::radians(mouseDelta.x), mUpVector);
 
@@ -53,4 +54,10 @@ void Camera::MoveLeft(float speed) {
 void Camera::MoveRight(float speed) {
 	glm::vec3 right = glm::cross(mViewDirection, mUpVector);
 	mEye += right * speed;
+}
+void Camera::MoveUp(float speed) {
+	mEye += mUpVector * speed;
+}
+void Camera::MoveDown(float speed) {
+	mEye -= mUpVector * speed;
 }
