@@ -108,7 +108,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\Daniel\Desktop\VFX\GraphicsEngine\OpenGLEngine\OpenGLEngine\Camera;C:\Users\Daniel\Desktop\VFX\GraphicsEngine\OpenGLEngine\include\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Daniel\Desktop\VFX\GraphicsEngine\OpenGLEngine\OpenGLEngine\Shaders;C:\Users\Daniel\Desktop\VFX\GraphicsEngine\OpenGLEngine\OpenGLEngine\Camera;C:\Users\Daniel\Desktop\VFX\GraphicsEngine\OpenGLEngine\include\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -137,6 +137,7 @@
     <ClCompile Include="Camera\Camera.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="OpenGLEngine.cpp" />
+    <ClCompile Include="Shaders\Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\shaders\frag.glsl" />
@@ -144,6 +145,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera\Camera.hpp" />
+    <ClInclude Include="Shaders\Shader.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
