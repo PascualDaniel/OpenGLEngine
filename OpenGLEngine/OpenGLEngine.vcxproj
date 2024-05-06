@@ -138,6 +138,7 @@
     <ClCompile Include="glad.c" />
     <ClCompile Include="OpenGLEngine.cpp" />
     <ClCompile Include="Shaders\Shader.cpp" />
+    <ClCompile Include="Vertex\IBO.cpp" />
     <ClCompile Include="Vertex\VAO.cpp" />
     <ClCompile Include="Vertex\VBO.cpp" />
   </ItemGroup>
@@ -148,6 +149,7 @@
   <ItemGroup>
     <ClInclude Include="Camera\Camera.hpp" />
     <ClInclude Include="Shaders\Shader.hpp" />
+    <ClInclude Include="Vertex\IBO.hpp" />
     <ClInclude Include="Vertex\VAO.hpp" />
     <ClInclude Include="Vertex\VBO.hpp" />
   </ItemGroup>

@@ -29,6 +29,7 @@
 
 #include "VAO.hpp"
 #include "VBO.hpp"
+#include "IBO.hpp"
 
 //=================================================Globals=================================================
 //=================================================Globals=================================================
@@ -47,9 +48,11 @@ GLuint gGraphicsPipelineShaderProgram = 0;
 
 //Vertex array object VAO
 GLuint gVertexArrayObject = 0;
+VAO VAO1;
 
 //Vertex array object VBO
 GLuint gVertexBufferObject = 0;
+VBO VBO1;
 
 // Index Buffer Object IBO
 GLuint gIndexBufferObject = 0;
@@ -109,7 +112,6 @@ void InitialiceProgram() {
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     //Precision de profundidad y Overlap
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-
     //Crear Ventana
     gGraphicsApplicationWindow =  SDL_CreateWindow("OpenGl Window",
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
@@ -125,14 +127,12 @@ void InitialiceProgram() {
         std::cout << "Error: SDL_GLContex was not available" << std::endl;
         exit(1);
     }
-
     //initialize GLAD
     if (!gladLoadGLLoader(SDL_GL_GetProcAddress)) {
         std::cout << "Error: GLAD was not initialized" << std::endl;
         exit(1);
     }
     GetOpenGLVersionInfo();
-
 }
 
 void CreateTexture(GLuint& texture) {
@@ -174,6 +174,9 @@ void VertexSpecification() {
      0.5f,  0.5f, 0.0f,     0.0f, 0.0f, 1.0f,	1.0f, 1.0f, // Upper right corner
      0.5f, -0.5f, 0.0f,     1.0f, 1.0f, 1.0f,	1.0f, 0.0f  // Lower right corner
 };
+
+
+
 
     //Settings things on the GPU
     glGenVertexArrays(1, &gVertexArrayObject);
@@ -226,7 +229,6 @@ void VertexSpecification() {
 
 void CreateGraphicsPipeline() {
     Shader gShader = Shader("path/to/vertexShader.glsl", "path/to/fragmentShader.glsl");
-
     gGraphicsPipelineShaderProgram = gShader.getGraphicsPipeline();
 }
 
