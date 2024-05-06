@@ -16,6 +16,8 @@ public:
     void setFloat(const std::string& name, float value); // method to set float uniform
     
     GLuint getGraphicsPipeline();
+
+    void Delete(); // Desvincula el shader
     
 
 private:

@@ -110,3 +110,11 @@ GLuint Shader::CreateShaderProgram(const std::string& vertexshaderssource, const
 
 }
 
+
+
+// Deletes the Shader Program
+void Shader::Delete()
+{
+    glDeleteProgram(ID);
+}
+
