@@ -3,10 +3,11 @@
 
 #include <glad/glad.h> // include glad to get all the required OpenGL headers
 
-#include "Shader.hpp"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+
+
+
+#include "Shader.hpp"
 
 class Texture {
 public:

@@ -1,5 +1,8 @@
 #include "Shader.hpp"
 
+Shader::Shader() {
+    ID = 0;
+}
 Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath) {
 
     vertexShaderSource = LoadShaderAsString("../shaders/vert.glsl");
@@ -110,7 +113,11 @@ GLuint Shader::CreateShaderProgram(const std::string& vertexshaderssource, const
 
 }
 
-
+// Activates the Shader Program
+void Shader::Activate()
+{
+    glUseProgram(ID);
+}
 
 // Deletes the Shader Program
 void Shader::Delete()

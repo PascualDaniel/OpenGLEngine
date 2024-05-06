@@ -1,6 +1,11 @@
 ﻿  Camera.cpp
   OpenGLEngine.cpp
   Shader.cpp
+  Texture.cpp
+  IBO.cpp
+  VAO.cpp
+C:\Users\Daniel\Desktop\VFX\GraphicsEngine\OpenGLEngine\OpenGLEngine\Vertex\VAO.cpp(11,63): warning C4244: 'argumento': conversión de 'GLsizeiptr' a 'GLsizei'; posible pérdida de datos
+  VBO.cpp
   Generando código...
   glad.c
   OpenGLEngine.vcxproj -> C:\Users\Daniel\Desktop\VFX\GraphicsEngine\OpenGLEngine\x64\Debug\OpenGLEngine.exe

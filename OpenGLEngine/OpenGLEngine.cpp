@@ -16,8 +16,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
 
 //=================================================Propias=================================================
 //=================================================Propias=================================================
@@ -30,6 +28,8 @@
 #include "VAO.hpp"
 #include "VBO.hpp"
 #include "IBO.hpp"
+
+
 
 //=================================================Globals=================================================
 //=================================================Globals=================================================
@@ -48,15 +48,18 @@ GLuint gGraphicsPipelineShaderProgram = 0;
 
 //Vertex array object VAO
 GLuint gVertexArrayObject = 0;
+
 VAO VAO1;
 
 //Vertex array object VBO
 GLuint gVertexBufferObject = 0;
+
 VBO VBO1;
 
 // Index Buffer Object IBO
 GLuint gIndexBufferObject = 0;
 
+IBO IBO1;
 
 float g_uOffset = -2.0f;
 float g_uRotate = 0.0f;
@@ -64,8 +67,23 @@ float g_uScale  = 0.5f;
 
 //Camara global Unica
 Camera gCamera;
+Shader gShader;
 
 
+//Lives on the CPU, the reiangle
+const std::vector<GLfloat> vertexData
+{ //     COORDINATES     /        COLORS      /   TexCoord  //
+-0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f,	0.0f, 0.0f, // Lower left corner
+-0.5f,  0.5f, 0.0f,     0.0f, 1.0f, 0.0f,	0.0f, 1.0f, // Upper left corner
+ 0.5f,  0.5f, 0.0f,     0.0f, 0.0f, 1.0f,	1.0f, 1.0f, // Upper right corner
+ 0.5f, -0.5f, 0.0f,     1.0f, 1.0f, 1.0f,	1.0f, 0.0f  // Lower right corner
+};
+
+const std::vector<GLuint> indexBufferData
+{
+    0, 2, 1, // Upper triangle
+    0, 3, 2 // Lower triangle
+};
 
 //=================================================Errores=================================================
 
@@ -135,100 +153,35 @@ void InitialiceProgram() {
     GetOpenGLVersionInfo();
 }
 
-void CreateTexture(GLuint& texture) {
-    //importar la imagen
-    int widthImg, heightImg, numColCh;
-    unsigned char* bytes = stbi_load("C:/Users/Daniel/Desktop/VFX/GraphicsEngine/OpenGLEngine/textures/container.jpg", &widthImg, &heightImg, &numColCh, 0);
-    //crea la textura
-    glGenTextures(1, &texture);
-    //la enlaza
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    //tipo de interpolacion 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    //tipo de repeticion
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-    //Puede dar error GL_RGB jpegs / GL_RGBA pngs / rgb jpg
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widthImg, heightImg, 0, GL_RGB, GL_UNSIGNED_BYTE, bytes);
-    //añade mipmaps, lo de repetir con distancia mas pequiño
-    glGenerateMipmap(GL_TEXTURE_2D);
-
-    stbi_image_free(bytes);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-}
-
-void DeleteTexture(GLuint& texture) {
-    glDeleteTextures(1, &texture);
-}
+//unsigned char* bytes = stbi_load("C:/Users/Daniel/Desktop/VFX/GraphicsEngine/OpenGLEngine/textures/container.jpg", &widthImg, &heightImg, &numColCh, 0);
 
 void VertexSpecification() {
-    //Lives on the CPU, the reiangle
-    const std::vector<GLfloat> vertexData
-     { //     COORDINATES     /        COLORS      /   TexCoord  //
-    -0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f,	0.0f, 0.0f, // Lower left corner
-    -0.5f,  0.5f, 0.0f,     0.0f, 1.0f, 0.0f,	0.0f, 1.0f, // Upper left corner
-     0.5f,  0.5f, 0.0f,     0.0f, 0.0f, 1.0f,	1.0f, 1.0f, // Upper right corner
-     0.5f, -0.5f, 0.0f,     1.0f, 1.0f, 1.0f,	1.0f, 0.0f  // Lower right corner
-};
-
-
-
-
-    //Settings things on the GPU
-    glGenVertexArrays(1, &gVertexArrayObject);
-    glBindVertexArray(gVertexArrayObject);
-
-    //Genera el VBO
-    glGenBuffers(1, &gVertexBufferObject);
-    //Selecciona el objeto del buffer con el que trabajaremos
-    glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObject);
-    //Ponemos los datos en el array (traslada de la CPU al la GPU)
-    glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(GLfloat), vertexData.data(), GL_STATIC_DRAW);
-
-
-    const std::vector<GLuint> indexBufferData
-    {
-        0, 2, 1, // Upper triangle
-        0, 3, 2 // Lower triangle
-    };
-
-    //Crear el Index Buffer Object (IBO i.e. EBO)
-    glGenBuffers(1, &gIndexBufferObject);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gIndexBufferObject);
-    // Poblar el Index Bufer
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferData.size() * sizeof(GLuint), indexBufferData.data(), GL_STATIC_DRAW);
-
-
-    //Dice a openGL como se usa la informacion
-    glEnableVertexAttribArray(0);
-    //Por cada atributo especifica como se mueve por los datos
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)0);
-
-    //Linkearlos al VAO
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)( sizeof(GLfloat)*3));
-
     
 
-    //Linkearlos al VAO
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 6));
+    // Generates Vertex Array Object and binds it
+    VAO VAO1;
+    VAO1.Bind();
 
-    glBindVertexArray(0);
-    //Descativar atributos
-    glDisableVertexAttribArray(0);
-    glDisableVertexAttribArray(1);
+    // Generates Vertex Buffer Object and links it to vertices
+    VBO1 = VBO(vertexData, sizeof(vertexData));
+    // Generates Element Buffer Object and links it to indices
+    IBO1 = IBO(indexBufferData, sizeof(indexBufferData));
+
+    // Links VBO attributes such as coordinates and colors to VAO
+    VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
+    VAO1.LinkAttrib(VBO1, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    VAO1.LinkAttrib(VBO1, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    // Unbind all to prevent accidentally modifying them
+    VAO1.Unbind();
+    VBO1.Unbind();
+    IBO1.Unbind();
     
 
 }
 
 
 void CreateGraphicsPipeline() {
-    Shader gShader = Shader("path/to/vertexShader.glsl", "path/to/fragmentShader.glsl");
+   Shader  gShader = Shader("path/to/vertexShader.glsl", "path/to/fragmentShader.glsl");
     gGraphicsPipelineShaderProgram = gShader.getGraphicsPipeline();
 }
 
@@ -352,27 +305,28 @@ void PreDraw() {
     }
 
 }
+//unsigned char* bytes = stbi_load("C:/Users/Daniel/Desktop/VFX/GraphicsEngine/OpenGLEngine/textures/container.jpg", &widthImg, &heightImg, &numColCh, 0);
 
 
 void Draw() {
-    GLuint texture = 0;
-    CreateTexture(texture);
-    
+
+    Texture texture("C:/Users/Daniel/Desktop/VFX/GraphicsEngine/OpenGLEngine/textures/container.jpg", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
+    texture.texUnit(gShader, "tex0", 0);
 
     //Activa atributos
     glBindVertexArray(gVertexArrayObject);
 
     //Selecciona el objeto a activar
     //glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObject);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    texture.Bind();
     //Renderiza lso datos
     //glDrawArrays(GL_TRIANGLES, 0, 6);
     GLCheck(glDrawElements(GL_TRIANGLES, 6,GL_UNSIGNED_INT,0));
 
 
-    DeleteTexture(texture);
+    texture.Delete();
     //Para de usar el pipeline (Necesario si solo hay un pipeline)
-    glUseProgram(0);
+    gShader.Delete();
 }
 
 void MainLoop() {
@@ -401,11 +355,12 @@ int main(int argc, char* args[])
 {
     //1. Inicializar el programa de graficos
     InitialiceProgram();
-    //2. Inicializar la jometria
-    VertexSpecification();
     //3. Crear la graphics pipeline
     // Vertex y fragment shader como minimo
     CreateGraphicsPipeline();
+    //2. Inicializar la jometria
+    VertexSpecification();
+    
     //4. La funcionalidad de la aplicacion (Dibujo)
     MainLoop();
     //5. Limpieza de funciones
