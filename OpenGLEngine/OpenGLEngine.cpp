@@ -49,17 +49,15 @@ GLuint gGraphicsPipelineShaderProgram = 0;
 //Vertex array object VAO
 GLuint gVertexArrayObject = 0;
 
-VAO VAO1;
+
 
 //Vertex array object VBO
 GLuint gVertexBufferObject = 0;
 
-VBO VBO1;
 
 // Index Buffer Object IBO
 GLuint gIndexBufferObject = 0;
 
-IBO IBO1;
 
 float g_uOffset = -2.0f;
 float g_uRotate = 0.0f;
@@ -84,6 +82,13 @@ const std::vector<GLuint> indexBufferData
     0, 2, 1, // Upper triangle
     0, 3, 2 // Lower triangle
 };
+
+
+VBO VBO1;
+IBO IBO1;
+
+const char* vert = "C:/Users/Daniel/Desktop/VFX/GraphicsEngine/OpenGLEngine/shaders/vert.glsl";
+const char* frag = "C:/Users/Daniel/Desktop/VFX/GraphicsEngine/OpenGLEngine/shaders/frag.glsl";
 
 //=================================================Errores=================================================
 
@@ -151,43 +156,13 @@ void InitialiceProgram() {
         exit(1);
     }
     GetOpenGLVersionInfo();
-}
 
-//unsigned char* bytes = stbi_load("C:/Users/Daniel/Desktop/VFX/GraphicsEngine/OpenGLEngine/textures/container.jpg", &widthImg, &heightImg, &numColCh, 0);
-
-void VertexSpecification() {
-    
-
-    // Generates Vertex Array Object and binds it
-    VAO VAO1;
-    VAO1.Bind();
-
-    // Generates Vertex Buffer Object and links it to vertices
-    VBO1 = VBO(vertexData, sizeof(vertexData));
-    // Generates Element Buffer Object and links it to indices
-    IBO1 = IBO(indexBufferData, sizeof(indexBufferData));
-
-    // Links VBO attributes such as coordinates and colors to VAO
-    VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
-    VAO1.LinkAttrib(VBO1, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    VAO1.LinkAttrib(VBO1, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    // Unbind all to prevent accidentally modifying them
-    VAO1.Unbind();
-    VBO1.Unbind();
-    IBO1.Unbind();
-    
-
-}
-
-
-void CreateGraphicsPipeline() {
-   Shader  gShader = Shader("path/to/vertexShader.glsl", "path/to/fragmentShader.glsl");
-    gGraphicsPipelineShaderProgram = gShader.getGraphicsPipeline();
+    glEnable(GL_DEBUG_OUTPUT);
 }
 
 void Input() {
-    static int mouseX = gScreenWidth  / 2;
-    static int mouseY = gScreenHeight / 2; 
+    static int mouseX = gScreenWidth / 2;
+    static int mouseY = gScreenHeight / 2;
 
     SDL_Event e;
 
@@ -201,7 +176,7 @@ void Input() {
             mouseY += e.motion.yrel;
             gCamera.MouseLook(mouseX, mouseY);
         }
-    }   
+    }
     const Uint8* state = SDL_GetKeyboardState(NULL);
     float speed = 0.1f;
     if (state[SDL_SCANCODE_W]) {
@@ -211,10 +186,10 @@ void Input() {
         gCamera.MoveBackward(speed);
     }
     if (state[SDL_SCANCODE_A]) {
-        gCamera.MoveLeft(speed);    
+        gCamera.MoveLeft(speed);
     }
     if (state[SDL_SCANCODE_D]) {
-        gCamera.MoveRight(speed);    
+        gCamera.MoveRight(speed);
     }
     if (state[SDL_SCANCODE_SPACE]) {
         gCamera.MoveUp(speed);
@@ -237,7 +212,34 @@ void Input() {
 
 
 }
-void PreDraw() {
+
+Shader CreateGraphicsPipeline() {
+    Shader  shader = Shader(vert, frag);
+    return shader;
+}
+
+void VertexSpecification(VAO VAO1, Shader shader) {
+    
+    // Generates Vertex Array Object and binds it
+    VAO1.Bind();
+    // Generates Vertex Buffer Object and links it to vertices
+    VBO1 = VBO(vertexData, sizeof(vertexData));
+    // Generates Element Buffer Object and links it to indices
+    IBO1 = IBO(indexBufferData, sizeof(indexBufferData));
+    // Links VBO attributes such as coordinates and colors to VAO
+    VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 8 * sizeof(GLfloat), (void*)0);
+    VAO1.LinkAttrib(VBO1, 1, 3, GL_FLOAT, 8 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
+    VAO1.LinkAttrib(VBO1, 2, 2, GL_FLOAT, 8 * sizeof(GLfloat), (void*)(6 * sizeof(GLfloat)));
+    // Unbind all to prevent accidentally modifying them
+    VAO1.Unbind();
+    VBO1.Unbind();
+    IBO1.Unbind();
+    
+}
+
+
+void PreDraw(Shader shader) {
+
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
 
@@ -246,18 +248,18 @@ void PreDraw() {
 
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     
-    glUseProgram(gGraphicsPipelineShaderProgram);
-   
-    g_uRotate += 0.5f;
-    //std::cout << "g_uRotate: " << g_uRotate << std::endl;
+    glUseProgram(shader.ID);
 
+    //gShader.Activate();
+     
     //Model Transformation 
+    g_uRotate += 0.5f;
     glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, g_uOffset));
     model           = glm::rotate(model, glm::radians(g_uRotate), glm::vec3(0.0f, 1.0f, 0.0f));
     model           = glm::scale(model,  glm::vec3(g_uScale, g_uScale, g_uScale));
 
     //Devuelve la localizacion de la matriz
-    GLint u_ModelMatrixLocation = glGetUniformLocation(gGraphicsPipelineShaderProgram, "u_ModelMatrix");
+    GLint u_ModelMatrixLocation = glGetUniformLocation(shader.ID, "u_ModelMatrix");
     if (u_ModelMatrixLocation >= 0) {      
         glUniformMatrix4fv(u_ModelMatrixLocation, 1, GL_FALSE, &model[0][0]);
     }
@@ -268,7 +270,7 @@ void PreDraw() {
 
     // Camara
     glm::mat4 view = gCamera.GetViewMatrix();
-    GLint u_ViewLocation = glGetUniformLocation(gGraphicsPipelineShaderProgram, "u_ViewMatrix");
+    GLint u_ViewLocation = glGetUniformLocation(shader.ID, "u_ViewMatrix");
     if (u_ViewLocation >= 0) {
         glUniformMatrix4fv(u_ViewLocation, 1, GL_FALSE, &view[0][0]);
     }
@@ -284,7 +286,7 @@ void PreDraw() {
                                             10.0f);
 
     //Devuelve la localizacion de la perspectiva
-    GLint u_ProjectionLocation = glGetUniformLocation(gGraphicsPipelineShaderProgram, "u_Projection");
+    GLint u_ProjectionLocation = glGetUniformLocation(shader.ID, "u_Projection");
     if (u_ProjectionLocation >= 0) {
         glUniformMatrix4fv(u_ProjectionLocation, 1, GL_FALSE, &perspective[0][0]);
     }
@@ -295,7 +297,7 @@ void PreDraw() {
 
 
     //Textura
-    GLint u_TextureLocation0 = glGetUniformLocation(gGraphicsPipelineShaderProgram, "u_Tex0");
+    GLint u_TextureLocation0 = glGetUniformLocation(shader.ID, "u_Tex0");
     if (u_TextureLocation0 >= 0) {
         glUniform1i(u_TextureLocation0, 0);
     }
@@ -305,31 +307,46 @@ void PreDraw() {
     }
 
 }
-//unsigned char* bytes = stbi_load("C:/Users/Daniel/Desktop/VFX/GraphicsEngine/OpenGLEngine/textures/container.jpg", &widthImg, &heightImg, &numColCh, 0);
 
 
-void Draw() {
 
-    Texture texture("C:/Users/Daniel/Desktop/VFX/GraphicsEngine/OpenGLEngine/textures/container.jpg", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
-    texture.texUnit(gShader, "tex0", 0);
+void Draw(Shader shader,VAO VAO1) {
 
-    //Activa atributos
-    glBindVertexArray(gVertexArrayObject);
+    Texture texture("C:/Users/Daniel/Desktop/VFX/GraphicsEngine/OpenGLEngine/textures/container.jpg", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGB, GL_UNSIGNED_BYTE);
+    texture.texUnit(shader, "tex0", 0);
 
-    //Selecciona el objeto a activar
-    //glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObject);
+    GLuint uniID = glGetUniformLocation(shader.ID, "scale");
+
+    // Specify the color of the background
+    glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+    // Clean the back buffer and assign the new color to it
+    glClear(GL_COLOR_BUFFER_BIT);
+    // Tell OpenGL which Shader Program we want to use
+    shader.Activate();
+    // Assigns a value to the uniform; NOTE: Must always be done after activating the Shader Program
+    glUniform1f(uniID, 0.5f);
+    // Binds texture so that is appears in rendering
     texture.Bind();
-    //Renderiza lso datos
-    //glDrawArrays(GL_TRIANGLES, 0, 6);
-    GLCheck(glDrawElements(GL_TRIANGLES, 6,GL_UNSIGNED_INT,0));
+    // Bind the VAO so OpenGL knows to use it
+    VAO1.Bind();
+    // Draw primitives, number of indices, datatype of indices, index of indices
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    
 
+
+    VAO1.Delete();
+    VBO1.Delete();
+    IBO1.Delete();
 
     texture.Delete();
     //Para de usar el pipeline (Necesario si solo hay un pipeline)
-    gShader.Delete();
+    shader.Delete();
+
+
+
 }
 
-void MainLoop() {
+void MainLoop(VAO VAO1,Shader shader) {
     //Encerrrar al raton dentro de la pantalla
     SDL_WarpMouseInWindow(gGraphicsApplicationWindow, gScreenWidth / 2, gScreenHeight / 2);
     SDL_SetRelativeMouseMode(SDL_TRUE);
@@ -337,9 +354,9 @@ void MainLoop() {
     while (!gQuit) {    
         Input();
         //Todo lo que OpenGl necesita antes de dibujar
-        PreDraw();
+        PreDraw(shader);
         // El dibujo
-        Draw();
+        Draw(shader,VAO1);
         //Actualiza la pantalla
         SDL_GL_SwapWindow(gGraphicsApplicationWindow);
     }
@@ -357,12 +374,13 @@ int main(int argc, char* args[])
     InitialiceProgram();
     //3. Crear la graphics pipeline
     // Vertex y fragment shader como minimo
-    CreateGraphicsPipeline();
+    Shader shader = CreateGraphicsPipeline();
+
+    VAO VAO1;
     //2. Inicializar la jometria
-    VertexSpecification();
-    
+    VertexSpecification(VAO1, shader);
     //4. La funcionalidad de la aplicacion (Dibujo)
-    MainLoop();
+    MainLoop(VAO1, shader);
     //5. Limpieza de funciones
     CleanUp();
 

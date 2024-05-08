@@ -7,7 +7,7 @@
 class VAO
 {
 public:
-	GLuint ID;	
+	GLuint ID = 0;	
 	VAO();
 
 	void LinkAttrib(VBO& VBO, GLuint layout, GLuint numComponents, GLenum type, GLsizeiptr stride, void* offset);
