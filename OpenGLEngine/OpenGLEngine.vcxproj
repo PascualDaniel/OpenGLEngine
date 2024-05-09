@@ -108,7 +108,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\Daniel\Desktop\VFX\GraphicsEngine\OpenGLEngine\OpenGLEngine\Camera;C:\Users\Daniel\Desktop\VFX\GraphicsEngine\OpenGLEngine\OpenGLEngine\Textures;C:\Users\Daniel\Desktop\VFX\GraphicsEngine\OpenGLEngine\OpenGLEngine\Shaders;C:\Users\Daniel\Desktop\VFX\GraphicsEngine\OpenGLEngine\include\glad;C:\Users\Daniel\Desktop\VFX\GraphicsEngine\OpenGLEngine\include\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Daniel\Desktop\VFX\GraphicsEngine\OpenGLEngine\include;C:\Users\Daniel\Desktop\VFX\GraphicsEngine\OpenGLEngine\OpenGLEngine\Camera;C:\Users\Daniel\Desktop\VFX\GraphicsEngine\OpenGLEngine\OpenGLEngine\Textures;C:\Users\Daniel\Desktop\VFX\GraphicsEngine\OpenGLEngine\OpenGLEngine\Shaders;C:\Users\Daniel\Desktop\VFX\GraphicsEngine\OpenGLEngine\include\glad;C:\Users\Daniel\Desktop\VFX\GraphicsEngine\OpenGLEngine\include\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
