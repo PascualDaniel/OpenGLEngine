@@ -36,3 +36,4 @@ include/
 /.vs/OpenGLEngine
 *.db
 *.ipch
+/OpenGLEngine/x64
