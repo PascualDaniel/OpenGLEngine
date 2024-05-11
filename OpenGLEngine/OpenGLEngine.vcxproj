@@ -138,6 +138,7 @@
     <ClCompile Include="glad.c" />
     <ClCompile Include="OpenGLEngine.cpp" />
     <ClCompile Include="Shaders\Shader.cpp" />
+    <ClCompile Include="Textures\Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\shaders\frag.glsl" />
@@ -146,6 +147,7 @@
   <ItemGroup>
     <ClInclude Include="Camera\Camera.hpp" />
     <ClInclude Include="Shaders\Shader.hpp" />
+    <ClInclude Include="Textures\Texture.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
