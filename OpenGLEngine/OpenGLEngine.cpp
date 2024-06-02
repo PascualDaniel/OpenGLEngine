@@ -200,17 +200,17 @@ void VertexSpecification() {
     //Dice a openGL como se usa la informacion
     glEnableVertexAttribArray(0);
     //Por cada atributo especifica como se mueve por los datos
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, false, 8 * sizeof(GLfloat), (void*)0);
 
     //Linkearlos al VAO
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)( sizeof(GLfloat)*3));
+    glVertexAttribPointer(1, 3, GL_FLOAT, false, 8 * sizeof(GLfloat), (void*)( sizeof(GLfloat)*3));
 
     
 
     //Linkearlos al VAO
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 6));
+    glVertexAttribPointer(2, 2, GL_FLOAT, false, 8 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 6));
 
     glBindVertexArray(0);
     //Descativar atributos
@@ -301,7 +301,7 @@ void PreDraw() {
     //Devuelve la localizacion de la matriz
     GLint u_ModelMatrixLocation = glGetUniformLocation(gGraphicsPipelineShaderProgram, "u_ModelMatrix");
     if (u_ModelMatrixLocation >= 0) {      
-        glUniformMatrix4fv(u_ModelMatrixLocation, 1, GL_FALSE, &model[0][0]);
+        glUniformMatrix4fv(u_ModelMatrixLocation, 1, false, &model[0][0]);
     }
     else {
         std::cout << "Could not find u_ModelMatrix "  << std::endl;
@@ -312,7 +312,7 @@ void PreDraw() {
     glm::mat4 view = gCamera.GetViewMatrix();
     GLint u_ViewLocation = glGetUniformLocation(gGraphicsPipelineShaderProgram, "u_ViewMatrix");
     if (u_ViewLocation >= 0) {
-        glUniformMatrix4fv(u_ViewLocation, 1, GL_FALSE, &view[0][0]);
+        glUniformMatrix4fv(u_ViewLocation, 1, false, &view[0][0]);
     }
     else {
         std::cout << "Could not find u_ViewMatrix " << std::endl;
@@ -328,7 +328,7 @@ void PreDraw() {
     //Devuelve la localizacion de la perspectiva
     GLint u_ProjectionLocation = glGetUniformLocation(gGraphicsPipelineShaderProgram, "u_Projection");
     if (u_ProjectionLocation >= 0) {
-        glUniformMatrix4fv(u_ProjectionLocation, 1, GL_FALSE, &perspective[0][0]);
+        glUniformMatrix4fv(u_ProjectionLocation, 1, false, &perspective[0][0]);
     }
     else {
         std::cout << "Could not find u_Projection " << std::endl;
