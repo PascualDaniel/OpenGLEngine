@@ -172,7 +172,7 @@ void DeleteTexture(GLuint& texture) {
     glDeleteTextures(1, &texture);
 }
 
-void VertexSpecification() {
+void VertexSpecification(Mesh3D* mesh) {
     //Lives on the CPU, the reiangle
     const std::vector<GLfloat> vertexData
      { //     COORDINATES     /        COLORS      /   TexCoord  //
@@ -183,13 +183,13 @@ void VertexSpecification() {
 };
 
     //Settings things on the GPU
-    glGenVertexArrays(1, &gMesh1.mVertexArrayObject);
-    glBindVertexArray(gMesh1.mVertexArrayObject);
+    glGenVertexArrays(1, &mesh->mVertexArrayObject);
+    glBindVertexArray(mesh->mVertexArrayObject);
 
     //Genera el VBO
-    glGenBuffers(1, &gMesh1.mVertexBufferObject);
+    glGenBuffers(1, &mesh->mVertexBufferObject);
     //Selecciona el objeto del buffer con el que trabajaremos
-    glBindBuffer(GL_ARRAY_BUFFER, gMesh1.mVertexBufferObject);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh->mVertexBufferObject);
     //Ponemos los datos en el array (traslada de la CPU al la GPU)
     glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(GLfloat), vertexData.data(), GL_STATIC_DRAW);
 
@@ -201,8 +201,8 @@ void VertexSpecification() {
     };
 
     //Crear el Index Buffer Object (IBO i.e. EBO)
-    glGenBuffers(1, &gMesh1.mIndexBufferObject);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gMesh1.mIndexBufferObject);
+    glGenBuffers(1, &mesh->mIndexBufferObject);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->mIndexBufferObject);
     // Poblar el Index Bufer
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferData.size() * sizeof(GLuint), indexBufferData.data(), GL_STATIC_DRAW);
 
@@ -398,6 +398,15 @@ void MainLoop() {
 
 void CleanUp() {
     SDL_DestroyWindow(gApp.mGraphicsApplicationWindow);
+    gApp.mGraphicsApplicationWindow = nullptr;
+
+    glDeleteBuffers(1, &gMesh1.mVertexArrayObject);
+    //glDeleteVertexArrays(&gMesh2.mVertexArrayObject);
+
+    //Delete graphisc pipeline
+    glDeleteProgram(gApp.mGraphicsPipelineShaderProgram);
+
+
     SDL_Quit();
 }
 
@@ -407,7 +416,7 @@ int main(int argc, char* args[])
     //1. Inicializar el programa de graficos
     InitialiceProgram();
     //2. Inicializar la jometria
-    VertexSpecification();
+    VertexSpecification(&gMesh1);
     //3. Crear la graphics pipeline
     // Vertex y fragment shader como minimo
     CreateGraphicsPipeline();
