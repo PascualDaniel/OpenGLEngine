@@ -25,39 +25,49 @@
 
 #include "Shader.hpp"
 
-
-
-//=================================================Globals=================================================
-//=================================================Globals=================================================
-
 // Dimensiones de la pantalla
-int gScreenHeight = 480;
-int gScreenWidth = 640;
-SDL_Window* gGraphicsApplicationWindow = nullptr;
-SDL_GLContext gOpenGLContext = nullptr;
+struct App{
+    int mScreenHeight = 480;
+    int mScreenWidth = 640;
+    SDL_Window* mGraphicsApplicationWindow = nullptr;
+    SDL_GLContext mOpenGLContext = nullptr;
 
-//MainLoop Flag
-bool gQuit = false; //Si true, cierra la app
+    //MainLoop Flag
+    bool mQuit = false; //Si true, cierra la app
 
-// Program Object for our shaders (Graphics pipeline)
-GLuint gGraphicsPipelineShaderProgram = 0;
+    // Program Object for our shaders (Graphics pipeline)
+    GLuint mGraphicsPipelineShaderProgram = 0;
 
-//Vertex array object VAO
-GLuint gVertexArrayObject = 0;
-
-//Vertex array object VBO
-GLuint gVertexBufferObject = 0;
-
-// Index Buffer Object IBO
-GLuint gIndexBufferObject = 0;
+    //Camara global Unica
+    Camera mCamera;
+};
 
 
-float g_uOffset = -2.0f;
-float g_uRotate = 0.0f;
-float g_uScale  = 0.5f;
 
-//Camara global Unica
-Camera gCamera;
+
+struct Mesh3D {
+
+    //Vertex array object VAO
+    GLuint mVertexArrayObject = 0;
+
+    //Vertex array object VBO
+    GLuint mVertexBufferObject = 0;
+
+    // Index Buffer Object IBO
+    GLuint mIndexBufferObject = 0;
+
+    float m_uOffset = -2.0f;
+    float m_uRotate = 0.0f;
+    float m_uScale = 0.5f;
+
+};
+//=================================================Globals=================================================
+//=================================================Globals=================================================
+App gApp;
+Mesh3D gMesh1;
+//Mesh3D gMesh2;
+
+
 
 
 
@@ -108,17 +118,17 @@ void InitialiceProgram() {
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
     //Crear Ventana
-    gGraphicsApplicationWindow =  SDL_CreateWindow("OpenGl Window",
+    gApp.mGraphicsApplicationWindow =  SDL_CreateWindow("OpenGl Window",
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-        gScreenWidth, gScreenHeight,
+        gApp.mScreenWidth, gApp.mScreenHeight,
         SDL_WINDOW_OPENGL);
-    if (gGraphicsApplicationWindow == nullptr) {
+    if (gApp.mGraphicsApplicationWindow == nullptr) {
         std::cout << "Error: SDL_Window was not able to create" << std::endl;
         exit(1);
     }
     //Crear contexto
-    gOpenGLContext = SDL_GL_CreateContext(gGraphicsApplicationWindow);
-    if (gOpenGLContext == nullptr) {
+    gApp.mOpenGLContext = SDL_GL_CreateContext(gApp.mGraphicsApplicationWindow);
+    if (gApp.mOpenGLContext == nullptr) {
         std::cout << "Error: SDL_GLContex was not available" << std::endl;
         exit(1);
     }
@@ -173,13 +183,13 @@ void VertexSpecification() {
 };
 
     //Settings things on the GPU
-    glGenVertexArrays(1, &gVertexArrayObject);
-    glBindVertexArray(gVertexArrayObject);
+    glGenVertexArrays(1, &gMesh1.mVertexArrayObject);
+    glBindVertexArray(gMesh1.mVertexArrayObject);
 
     //Genera el VBO
-    glGenBuffers(1, &gVertexBufferObject);
+    glGenBuffers(1, &gMesh1.mVertexBufferObject);
     //Selecciona el objeto del buffer con el que trabajaremos
-    glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObject);
+    glBindBuffer(GL_ARRAY_BUFFER, gMesh1.mVertexBufferObject);
     //Ponemos los datos en el array (traslada de la CPU al la GPU)
     glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(GLfloat), vertexData.data(), GL_STATIC_DRAW);
 
@@ -191,8 +201,8 @@ void VertexSpecification() {
     };
 
     //Crear el Index Buffer Object (IBO i.e. EBO)
-    glGenBuffers(1, &gIndexBufferObject);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gIndexBufferObject);
+    glGenBuffers(1, &gMesh1.mIndexBufferObject);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gMesh1.mIndexBufferObject);
     // Poblar el Index Bufer
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferData.size() * sizeof(GLuint), indexBufferData.data(), GL_STATIC_DRAW);
 
@@ -224,57 +234,57 @@ void VertexSpecification() {
 void CreateGraphicsPipeline() {
     Shader gShader = Shader("path/to/vertexShader.glsl", "path/to/fragmentShader.glsl");
 
-    gGraphicsPipelineShaderProgram = gShader.getGraphicsPipeline();
+    gApp.mGraphicsPipelineShaderProgram = gShader.getGraphicsPipeline();
 }
 
 void Input() {
-    static int mouseX = gScreenWidth  / 2;
-    static int mouseY = gScreenHeight / 2; 
+    static int mouseX = gApp.mScreenWidth  / 2;
+    static int mouseY = gApp.mScreenHeight / 2;
 
     SDL_Event e;
 
     while (SDL_PollEvent(&e) != 0) {
         if (e.type == SDL_QUIT) {
             std::cout << "Bye :3" << std::endl;
-            gQuit = true;
+            gApp.mQuit = true;
         }
         else if (e.type == SDL_MOUSEMOTION) {
             mouseX += e.motion.xrel;
             mouseY += e.motion.yrel;
-            gCamera.MouseLook(mouseX, mouseY);
+            gApp.mCamera.MouseLook(mouseX, mouseY);
         }
     }   
     const Uint8* state = SDL_GetKeyboardState(NULL);
     float speed = 0.1f;
     if (state[SDL_SCANCODE_W]) {
-        gCamera.MoveForward(speed);
+        gApp.mCamera.MoveForward(speed);
     }
     if (state[SDL_SCANCODE_S]) {
-        gCamera.MoveBackward(speed);
+        gApp.mCamera.MoveBackward(speed);
     }
     if (state[SDL_SCANCODE_A]) {
-        gCamera.MoveLeft(speed);    
+        gApp.mCamera.MoveLeft(speed);
     }
     if (state[SDL_SCANCODE_D]) {
-        gCamera.MoveRight(speed);    
+        gApp.mCamera.MoveRight(speed);
     }
     if (state[SDL_SCANCODE_SPACE]) {
-        gCamera.MoveUp(speed);
+        gApp.mCamera.MoveUp(speed);
     }
     if (state[SDL_SCANCODE_LCTRL]) {
-        gCamera.MoveDown(speed);
+        gApp.mCamera.MoveDown(speed);
     }
     if (state[SDL_SCANCODE_UP]) {
-        g_uOffset += 0.01f;
-        std::cout << "g_uOffset: " << g_uOffset << std::endl;
+        gMesh1.m_uOffset += 0.01f;
+        std::cout << "g_uOffset: " << gMesh1.m_uOffset << std::endl;
 
     }if (state[SDL_SCANCODE_DOWN]) {
-        g_uOffset -= 0.01f;
-        std::cout << "g_uOffset: " << g_uOffset << std::endl;
+        gMesh1.m_uOffset -= 0.01f;
+        std::cout << "g_uOffset: " << gMesh1.m_uOffset << std::endl;
     }
     if (state[SDL_SCANCODE_ESCAPE]) {
         std::cout << "Bye :3" << std::endl;
-        gQuit = true;
+        gApp.mQuit = true;
     }
 
 
@@ -283,23 +293,23 @@ void PreDraw() {
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
 
-    glViewport(0, 0, gScreenWidth, gScreenHeight);
+    glViewport(0, 0, gApp.mScreenWidth, gApp.mScreenHeight);
     glClearColor(1.f, 1.f, 0.1f, 1.f);
 
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     
-    glUseProgram(gGraphicsPipelineShaderProgram);
+    glUseProgram(gApp.mGraphicsPipelineShaderProgram);
    
-    g_uRotate += 0.5f;
+    gMesh1.m_uRotate += 0.5f;
     //std::cout << "g_uRotate: " << g_uRotate << std::endl;
 
     //Model Transformation 
-    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, g_uOffset));
-    model           = glm::rotate(model, glm::radians(g_uRotate), glm::vec3(0.0f, 1.0f, 0.0f));
-    model           = glm::scale(model,  glm::vec3(g_uScale, g_uScale, g_uScale));
+    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, gMesh1.m_uOffset));
+    model           = glm::rotate(model, glm::radians(gMesh1.m_uRotate), glm::vec3(0.0f, 1.0f, 0.0f));
+    model           = glm::scale(model,  glm::vec3(gMesh1.m_uScale, gMesh1.m_uScale, gMesh1.m_uScale));
 
     //Devuelve la localizacion de la matriz
-    GLint u_ModelMatrixLocation = glGetUniformLocation(gGraphicsPipelineShaderProgram, "u_ModelMatrix");
+    GLint u_ModelMatrixLocation = glGetUniformLocation(gApp.mGraphicsPipelineShaderProgram, "u_ModelMatrix");
     if (u_ModelMatrixLocation >= 0) {      
         glUniformMatrix4fv(u_ModelMatrixLocation, 1, false, &model[0][0]);
     }
@@ -309,8 +319,8 @@ void PreDraw() {
     }
 
     // Camara
-    glm::mat4 view = gCamera.GetViewMatrix();
-    GLint u_ViewLocation = glGetUniformLocation(gGraphicsPipelineShaderProgram, "u_ViewMatrix");
+    glm::mat4 view = gApp.mCamera.GetViewMatrix();
+    GLint u_ViewLocation = glGetUniformLocation(gApp.mGraphicsPipelineShaderProgram, "u_ViewMatrix");
     if (u_ViewLocation >= 0) {
         glUniformMatrix4fv(u_ViewLocation, 1, false, &view[0][0]);
     }
@@ -321,12 +331,12 @@ void PreDraw() {
 
     //Projection Transformation 
     glm::mat4 perspective = glm::perspective(glm::radians(45.0f),
-                                            (float)gScreenWidth/(float)gScreenHeight,
+                                            (float)gApp.mScreenWidth/(float)gApp.mScreenHeight,
                                             0.1f,
                                             10.0f);
 
     //Devuelve la localizacion de la perspectiva
-    GLint u_ProjectionLocation = glGetUniformLocation(gGraphicsPipelineShaderProgram, "u_Projection");
+    GLint u_ProjectionLocation = glGetUniformLocation(gApp.mGraphicsPipelineShaderProgram, "u_Projection");
     if (u_ProjectionLocation >= 0) {
         glUniformMatrix4fv(u_ProjectionLocation, 1, false, &perspective[0][0]);
     }
@@ -337,7 +347,7 @@ void PreDraw() {
 
 
     //Textura
-    GLint u_TextureLocation0 = glGetUniformLocation(gGraphicsPipelineShaderProgram, "u_Tex0");
+    GLint u_TextureLocation0 = glGetUniformLocation(gApp.mGraphicsPipelineShaderProgram, "u_Tex0");
     if (u_TextureLocation0 >= 0) {
         glUniform1i(u_TextureLocation0, 0);
     }
@@ -355,7 +365,7 @@ void Draw() {
     
 
     //Activa atributos
-    glBindVertexArray(gVertexArrayObject);
+    glBindVertexArray(gMesh1.mVertexArrayObject);
 
     //Selecciona el objeto a activar
     //glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObject);
@@ -372,22 +382,22 @@ void Draw() {
 
 void MainLoop() {
     //Encerrrar al raton dentro de la pantalla
-    SDL_WarpMouseInWindow(gGraphicsApplicationWindow, gScreenWidth / 2, gScreenHeight / 2);
+    SDL_WarpMouseInWindow(gApp.mGraphicsApplicationWindow, gApp.mScreenWidth / 2, gApp.mScreenHeight / 2);
     SDL_SetRelativeMouseMode(SDL_TRUE);
 
-    while (!gQuit) {    
+    while (!gApp.mQuit) {
         Input();
         //Todo lo que OpenGl necesita antes de dibujar
         PreDraw();
         // El dibujo
         Draw();
         //Actualiza la pantalla
-        SDL_GL_SwapWindow(gGraphicsApplicationWindow);
+        SDL_GL_SwapWindow(gApp.mGraphicsApplicationWindow);
     }
 }
 
 void CleanUp() {
-    SDL_DestroyWindow(gGraphicsApplicationWindow);
+    SDL_DestroyWindow(gApp.mGraphicsApplicationWindow);
     SDL_Quit();
 }
 
