@@ -102,7 +102,7 @@ void GetOpenGLVersionInfo(){
 
 
 
-void InitialiceProgram() {
+void InitialiceProgram(App* app) {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         std::cout << "SDL2 could not initialize video subsitem" << std::endl;
         exit(1);
@@ -118,17 +118,17 @@ void InitialiceProgram() {
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
     //Crear Ventana
-    gApp.mGraphicsApplicationWindow =  SDL_CreateWindow("OpenGl Window",
+    app->mGraphicsApplicationWindow =  SDL_CreateWindow("OpenGl Window",
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-        gApp.mScreenWidth, gApp.mScreenHeight,
+        app->mScreenWidth, app->mScreenHeight,
         SDL_WINDOW_OPENGL);
-    if (gApp.mGraphicsApplicationWindow == nullptr) {
+    if (app->mGraphicsApplicationWindow == nullptr) {
         std::cout << "Error: SDL_Window was not able to create" << std::endl;
         exit(1);
     }
     //Crear contexto
-    gApp.mOpenGLContext = SDL_GL_CreateContext(gApp.mGraphicsApplicationWindow);
-    if (gApp.mOpenGLContext == nullptr) {
+    app->mOpenGLContext = SDL_GL_CreateContext(app->mGraphicsApplicationWindow);
+    if (app->mOpenGLContext == nullptr) {
         std::cout << "Error: SDL_GLContex was not available" << std::endl;
         exit(1);
     }
@@ -414,7 +414,7 @@ void CleanUp() {
 int main(int argc, char* args[])
 {
     //1. Inicializar el programa de graficos
-    InitialiceProgram();
+    InitialiceProgram(&gApp);
     //2. Inicializar la jometria
     VertexSpecification(&gMesh1);
     //3. Crear la graphics pipeline
