@@ -25,6 +25,27 @@
 
 #include "Shader.hpp"
 
+//=================================================Errores=================================================
+
+static void GLClearAllErrors() {
+    while (glGetError() != GL_NO_ERROR) {
+
+    }
+}
+
+static bool GLCheckErrorStatus(const char* function, int line) {
+    while (GLenum error = glGetError()) {
+        std::cout << "OpenGL Error: " << error
+            << "\tLine: " << line
+            << "\tFunction: " << function
+            << std::endl;
+        return true;
+    }
+    return false;
+}
+#define GLCheck(x) GLClearAllErrors(); x;  GLCheckErrorStatus(#x,__LINE__);
+
+
 // Dimensiones de la pantalla
 struct App{
     int mScreenHeight = 480;
@@ -44,7 +65,7 @@ struct App{
 
 
 
-
+//Abstraccion del mesh
 struct Mesh3D {
 
     //Vertex array object VAO
@@ -61,6 +82,97 @@ struct Mesh3D {
     float m_uScale = 0.5f;
 
 };
+
+/**
+* Pone la geometria durante la vertexspecification por cada mesh
+*
+*/
+void MeshCreate(Mesh3D* mesh) {
+    //Lives on the CPU, the reiangle
+    const std::vector<GLfloat> vertexData
+    { //     COORDINATES     /        COLORS      /   TexCoord  //
+   -0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f,	0.0f, 0.0f, // Lower left corner
+   -0.5f,  0.5f, 0.0f,     0.0f, 1.0f, 0.0f,	0.0f, 1.0f, // Upper left corner
+    0.5f,  0.5f, 0.0f,     0.0f, 0.0f, 1.0f,	1.0f, 1.0f, // Upper right corner
+    0.5f, -0.5f, 0.0f,     1.0f, 1.0f, 1.0f,	1.0f, 0.0f  // Lower right corner
+    };
+
+    //Settings things on the GPU
+    glGenVertexArrays(1, &mesh->mVertexArrayObject);
+    glBindVertexArray(mesh->mVertexArrayObject);
+
+    //Genera el VBO
+    glGenBuffers(1, &mesh->mVertexBufferObject);
+    //Selecciona el objeto del buffer con el que trabajaremos
+    glBindBuffer(GL_ARRAY_BUFFER, mesh->mVertexBufferObject);
+    //Ponemos los datos en el array (traslada de la CPU al la GPU)
+    glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(GLfloat), vertexData.data(), GL_STATIC_DRAW);
+
+
+    const std::vector<GLuint> indexBufferData
+    {
+        0, 2, 1, // Upper triangle
+        0, 3, 2 // Lower triangle
+    };
+
+    //Crear el Index Buffer Object (IBO i.e. EBO)
+    glGenBuffers(1, &mesh->mIndexBufferObject);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->mIndexBufferObject);
+    // Poblar el Index Bufer
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferData.size() * sizeof(GLuint), indexBufferData.data(), GL_STATIC_DRAW);
+
+
+    //Dice a openGL como se usa la informacion
+    glEnableVertexAttribArray(0);
+    //Por cada atributo especifica como se mueve por los datos
+    glVertexAttribPointer(0, 3, GL_FLOAT, false, 8 * sizeof(GLfloat), (void*)0);
+
+    //Linkearlos al VAO
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, false, 8 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 3));
+
+
+
+    //Linkearlos al VAO
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, false, 8 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 6));
+
+    glBindVertexArray(0);
+    //Descativar atributos
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
+
+}
+/**
+* Metodo que dibuja un objeto
+* Falta txturas
+*/
+void DrawMesh(Mesh3D* mesh, GLuint pipeline) {
+    //GLuint texture = 0;
+    //CreateTexture(texture);
+
+
+    if (mesh != nullptr) {
+        return;
+    }
+
+    //Setup pipeline que vamos a utilizar
+    glUseProgram(pipeline);
+
+    //Activa atributos
+    glBindVertexArray(mesh->mVertexArrayObject);
+
+    //Selecciona el objeto a activar
+        //glBindTexture(GL_TEXTURE_2D, texture);
+    //Renderiza los datos
+    GLCheck(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
+
+    //DeleteTexture(texture);
+
+
+    //Para de usar el pipeline (Necesario si solo hay un pipeline)
+    glUseProgram(0);
+}
 //=================================================Globals=================================================
 //=================================================Globals=================================================
 App gApp;
@@ -68,28 +180,6 @@ Mesh3D gMesh1;
 //Mesh3D gMesh2;
 
 
-
-
-
-//=================================================Errores=================================================
-
-static void GLClearAllErrors() {
-    while (glGetError() != GL_NO_ERROR) {
-
-    }
-}
-
-static bool GLCheckErrorStatus(const char* function, int line) {
-    while (GLenum error = glGetError()) {
-        std::cout << "OpenGL Error: " << error
-            <<"\tLine: " << line
-            <<"\tFunction: " << function
-            << std::endl;
-        return true;
-    }
-    return false;
-}
-#define GLCheck(x) GLClearAllErrors(); x;  GLCheckErrorStatus(#x,__LINE__);
 //=================================================Funcionalidades=================================================
 
 
@@ -172,63 +262,7 @@ void DeleteTexture(GLuint& texture) {
     glDeleteTextures(1, &texture);
 }
 
-void VertexSpecification(Mesh3D* mesh) {
-    //Lives on the CPU, the reiangle
-    const std::vector<GLfloat> vertexData
-     { //     COORDINATES     /        COLORS      /   TexCoord  //
-    -0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f,	0.0f, 0.0f, // Lower left corner
-    -0.5f,  0.5f, 0.0f,     0.0f, 1.0f, 0.0f,	0.0f, 1.0f, // Upper left corner
-     0.5f,  0.5f, 0.0f,     0.0f, 0.0f, 1.0f,	1.0f, 1.0f, // Upper right corner
-     0.5f, -0.5f, 0.0f,     1.0f, 1.0f, 1.0f,	1.0f, 0.0f  // Lower right corner
-};
 
-    //Settings things on the GPU
-    glGenVertexArrays(1, &mesh->mVertexArrayObject);
-    glBindVertexArray(mesh->mVertexArrayObject);
-
-    //Genera el VBO
-    glGenBuffers(1, &mesh->mVertexBufferObject);
-    //Selecciona el objeto del buffer con el que trabajaremos
-    glBindBuffer(GL_ARRAY_BUFFER, mesh->mVertexBufferObject);
-    //Ponemos los datos en el array (traslada de la CPU al la GPU)
-    glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(GLfloat), vertexData.data(), GL_STATIC_DRAW);
-
-
-    const std::vector<GLuint> indexBufferData
-    {
-        0, 2, 1, // Upper triangle
-        0, 3, 2 // Lower triangle
-    };
-
-    //Crear el Index Buffer Object (IBO i.e. EBO)
-    glGenBuffers(1, &mesh->mIndexBufferObject);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->mIndexBufferObject);
-    // Poblar el Index Bufer
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferData.size() * sizeof(GLuint), indexBufferData.data(), GL_STATIC_DRAW);
-
-
-    //Dice a openGL como se usa la informacion
-    glEnableVertexAttribArray(0);
-    //Por cada atributo especifica como se mueve por los datos
-    glVertexAttribPointer(0, 3, GL_FLOAT, false, 8 * sizeof(GLfloat), (void*)0);
-
-    //Linkearlos al VAO
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, false, 8 * sizeof(GLfloat), (void*)( sizeof(GLfloat)*3));
-
-    
-
-    //Linkearlos al VAO
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, false, 8 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 6));
-
-    glBindVertexArray(0);
-    //Descativar atributos
-    glDisableVertexAttribArray(0);
-    glDisableVertexAttribArray(1);
-    
-
-}
 
 
 void CreateGraphicsPipeline() {
@@ -289,7 +323,7 @@ void Input() {
 
 
 }
-void PreDraw() {
+void MeshUpdate(Mesh3D* mesh) {
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
 
@@ -300,13 +334,13 @@ void PreDraw() {
     
     glUseProgram(gApp.mGraphicsPipelineShaderProgram);
    
-    gMesh1.m_uRotate += 0.5f;
+    mesh->m_uRotate += 0.5f;
     //std::cout << "g_uRotate: " << g_uRotate << std::endl;
 
     //Model Transformation 
-    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, gMesh1.m_uOffset));
-    model           = glm::rotate(model, glm::radians(gMesh1.m_uRotate), glm::vec3(0.0f, 1.0f, 0.0f));
-    model           = glm::scale(model,  glm::vec3(gMesh1.m_uScale, gMesh1.m_uScale, gMesh1.m_uScale));
+    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, mesh->m_uOffset));
+    model           = glm::rotate(model, glm::radians(mesh->m_uRotate), glm::vec3(0.0f, 1.0f, 0.0f));
+    model           = glm::scale(model,  glm::vec3(mesh->m_uScale, mesh->m_uScale, mesh->m_uScale));
 
     //Devuelve la localizacion de la matriz
     GLint u_ModelMatrixLocation = glGetUniformLocation(gApp.mGraphicsPipelineShaderProgram, "u_ModelMatrix");
@@ -345,7 +379,7 @@ void PreDraw() {
         exit(EXIT_FAILURE);
     }
 
-
+    /*
     //Textura
     GLint u_TextureLocation0 = glGetUniformLocation(gApp.mGraphicsPipelineShaderProgram, "u_Tex0");
     if (u_TextureLocation0 >= 0) {
@@ -355,30 +389,11 @@ void PreDraw() {
         std::cout << "Could not find u_Tex0 " << std::endl;
         exit(EXIT_FAILURE);
     }
+    */
 
 }
 
 
-void Draw() {
-    GLuint texture = 0;
-    CreateTexture(texture);
-    
-
-    //Activa atributos
-    glBindVertexArray(gMesh1.mVertexArrayObject);
-
-    //Selecciona el objeto a activar
-    //glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObject);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    //Renderiza lso datos
-    //glDrawArrays(GL_TRIANGLES, 0, 6);
-    GLCheck(glDrawElements(GL_TRIANGLES, 6,GL_UNSIGNED_INT,0));
-
-
-    DeleteTexture(texture);
-    //Para de usar el pipeline (Necesario si solo hay un pipeline)
-    glUseProgram(0);
-}
 
 void MainLoop() {
     //Encerrrar al raton dentro de la pantalla
