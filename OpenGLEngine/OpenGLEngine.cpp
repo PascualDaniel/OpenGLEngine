@@ -63,6 +63,15 @@ struct App{
     Camera mCamera;
 };
 
+App gApp;
+
+
+struct Transform {
+    float x, y, z;
+
+};
+
+
 
 
 //Abstraccion del mesh
@@ -76,6 +85,10 @@ struct Mesh3D {
 
     // Index Buffer Object IBO
     GLuint mIndexBufferObject = 0;
+    //graphic pipeline usado con el mesh
+    GLuint mPipeline = 0;
+
+    Transform mTransform;
 
     float m_uOffset = -2.0f;
     float m_uRotate = 0.0f;
@@ -85,9 +98,11 @@ struct Mesh3D {
 
 /**
 * Pone la geometria durante la vertexspecification por cada mesh
-*
+* es un constucctor
 */
 void MeshCreate(Mesh3D* mesh) {
+   
+
     //Lives on the CPU, the reiangle
     const std::vector<GLfloat> vertexData
     { //     COORDINATES     /        COLORS      /   TexCoord  //
@@ -143,21 +158,93 @@ void MeshCreate(Mesh3D* mesh) {
     glDisableVertexAttribArray(1);
 
 }
+void MeshDelete(Mesh3D* mesh) {
+    glDeleteBuffers(1, &mesh->mVertexArrayObject);
+    glDeleteVertexArrays(1, &mesh->mVertexArrayObject);
+}
+void MeshUpdate(Mesh3D* mesh) {
+    
+
+    glUseProgram(mesh->mPipeline);
+
+    mesh->m_uRotate += 0.5f;
+    //std::cout << "g_uRotate: " << g_uRotate << std::endl;
+
+    //Model Transformation 
+    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(mesh->mTransform.x, mesh->mTransform.y, mesh->mTransform.z));
+    model = glm::rotate(model, glm::radians(mesh->m_uRotate), glm::vec3(0.0f, 1.0f, 0.0f));
+    model = glm::scale(model, glm::vec3(mesh->m_uScale, mesh->m_uScale, mesh->m_uScale));
+
+    //Devuelve la localizacion de la matriz
+    GLint u_ModelMatrixLocation = glGetUniformLocation(gApp.mGraphicsPipelineShaderProgram, "u_ModelMatrix");
+    if (u_ModelMatrixLocation >= 0) {
+        glUniformMatrix4fv(u_ModelMatrixLocation, 1, false, &model[0][0]);
+    }
+    else {
+        std::cout << "Could not find u_ModelMatrix " << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    // Camara
+    glm::mat4 view = gApp.mCamera.GetViewMatrix();
+    GLint u_ViewLocation = glGetUniformLocation(gApp.mGraphicsPipelineShaderProgram, "u_ViewMatrix");
+    if (u_ViewLocation >= 0) {
+        glUniformMatrix4fv(u_ViewLocation, 1, false, &view[0][0]);
+    }
+    else {
+        std::cout << "Could not find u_ViewMatrix " << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    //Projection Transformation 
+    glm::mat4 perspective = glm::perspective(glm::radians(45.0f),
+        (float)gApp.mScreenWidth / (float)gApp.mScreenHeight,
+        0.1f,
+        10.0f);
+
+    //Devuelve la localizacion de la perspectiva
+    GLint u_ProjectionLocation = glGetUniformLocation(gApp.mGraphicsPipelineShaderProgram, "u_Projection");
+    if (u_ProjectionLocation >= 0) {
+        glUniformMatrix4fv(u_ProjectionLocation, 1, false, &perspective[0][0]);
+    }
+    else {
+        std::cout << "Could not find u_Projection " << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    /*
+    //Textura
+    GLint u_TextureLocation0 = glGetUniformLocation(gApp.mGraphicsPipelineShaderProgram, "u_Tex0");
+    if (u_TextureLocation0 >= 0) {
+        glUniform1i(u_TextureLocation0, 0);
+    }
+    else {
+        std::cout << "Could not find u_Tex0 " << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    */
+
+}
+void MeshSetPipeline(Mesh3D* mesh, GLuint pipeline) {
+    //Pipeline setup
+    mesh->mPipeline = pipeline;
+}
+
 /**
 * Metodo que dibuja un objeto
 * Falta txturas
 */
-void DrawMesh(Mesh3D* mesh, GLuint pipeline) {
+void MeshDraw(Mesh3D* mesh ) {
     //GLuint texture = 0;
     //CreateTexture(texture);
 
 
-    if (mesh != nullptr) {
+    if (mesh == nullptr) {
         return;
     }
 
     //Setup pipeline que vamos a utilizar
-    glUseProgram(pipeline);
+    glUseProgram(mesh->mPipeline);
 
     //Activa atributos
     glBindVertexArray(mesh->mVertexArrayObject);
@@ -175,9 +262,9 @@ void DrawMesh(Mesh3D* mesh, GLuint pipeline) {
 }
 //=================================================Globals=================================================
 //=================================================Globals=================================================
-App gApp;
+
 Mesh3D gMesh1;
-//Mesh3D gMesh2;
+Mesh3D gMesh2;
 
 
 //=================================================Funcionalidades=================================================
@@ -323,76 +410,6 @@ void Input() {
 
 
 }
-void MeshUpdate(Mesh3D* mesh) {
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
-
-    glViewport(0, 0, gApp.mScreenWidth, gApp.mScreenHeight);
-    glClearColor(1.f, 1.f, 0.1f, 1.f);
-
-    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-    
-    glUseProgram(gApp.mGraphicsPipelineShaderProgram);
-   
-    mesh->m_uRotate += 0.5f;
-    //std::cout << "g_uRotate: " << g_uRotate << std::endl;
-
-    //Model Transformation 
-    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, mesh->m_uOffset));
-    model           = glm::rotate(model, glm::radians(mesh->m_uRotate), glm::vec3(0.0f, 1.0f, 0.0f));
-    model           = glm::scale(model,  glm::vec3(mesh->m_uScale, mesh->m_uScale, mesh->m_uScale));
-
-    //Devuelve la localizacion de la matriz
-    GLint u_ModelMatrixLocation = glGetUniformLocation(gApp.mGraphicsPipelineShaderProgram, "u_ModelMatrix");
-    if (u_ModelMatrixLocation >= 0) {      
-        glUniformMatrix4fv(u_ModelMatrixLocation, 1, false, &model[0][0]);
-    }
-    else {
-        std::cout << "Could not find u_ModelMatrix "  << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
-    // Camara
-    glm::mat4 view = gApp.mCamera.GetViewMatrix();
-    GLint u_ViewLocation = glGetUniformLocation(gApp.mGraphicsPipelineShaderProgram, "u_ViewMatrix");
-    if (u_ViewLocation >= 0) {
-        glUniformMatrix4fv(u_ViewLocation, 1, false, &view[0][0]);
-    }
-    else {
-        std::cout << "Could not find u_ViewMatrix " << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
-    //Projection Transformation 
-    glm::mat4 perspective = glm::perspective(glm::radians(45.0f),
-                                            (float)gApp.mScreenWidth/(float)gApp.mScreenHeight,
-                                            0.1f,
-                                            10.0f);
-
-    //Devuelve la localizacion de la perspectiva
-    GLint u_ProjectionLocation = glGetUniformLocation(gApp.mGraphicsPipelineShaderProgram, "u_Projection");
-    if (u_ProjectionLocation >= 0) {
-        glUniformMatrix4fv(u_ProjectionLocation, 1, false, &perspective[0][0]);
-    }
-    else {
-        std::cout << "Could not find u_Projection " << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
-    /*
-    //Textura
-    GLint u_TextureLocation0 = glGetUniformLocation(gApp.mGraphicsPipelineShaderProgram, "u_Tex0");
-    if (u_TextureLocation0 >= 0) {
-        glUniform1i(u_TextureLocation0, 0);
-    }
-    else {
-        std::cout << "Could not find u_Tex0 " << std::endl;
-        exit(EXIT_FAILURE);
-    }
-    */
-
-}
-
 
 
 void MainLoop() {
@@ -402,10 +419,22 @@ void MainLoop() {
 
     while (!gApp.mQuit) {
         Input();
+
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_CULL_FACE);
+
+        glViewport(0, 0, gApp.mScreenWidth, gApp.mScreenHeight);
+        glClearColor(1.f, 1.f, 0.1f, 1.f);
+
+        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
         //Todo lo que OpenGl necesita antes de dibujar
-        PreDraw();
+        MeshUpdate(&gMesh1);      
         // El dibujo
-        Draw();
+        MeshDraw(&gMesh1);
+
+        MeshUpdate(&gMesh2);
+        MeshDraw(&gMesh2);
         //Actualiza la pantalla
         SDL_GL_SwapWindow(gApp.mGraphicsApplicationWindow);
     }
@@ -415,8 +444,10 @@ void CleanUp() {
     SDL_DestroyWindow(gApp.mGraphicsApplicationWindow);
     gApp.mGraphicsApplicationWindow = nullptr;
 
-    glDeleteBuffers(1, &gMesh1.mVertexArrayObject);
-    //glDeleteVertexArrays(&gMesh2.mVertexArrayObject);
+    MeshDelete(&gMesh1);
+    MeshDelete(&gMesh2);
+
+ 
 
     //Delete graphisc pipeline
     glDeleteProgram(gApp.mGraphicsPipelineShaderProgram);
@@ -431,10 +462,24 @@ int main(int argc, char* args[])
     //1. Inicializar el programa de graficos
     InitialiceProgram(&gApp);
     //2. Inicializar la jometria
-    VertexSpecification(&gMesh1);
+    MeshCreate(&gMesh1);
+    gMesh1.mTransform.x = 0.0f;
+    gMesh1.mTransform.y = 0.0f;
+    gMesh1.mTransform.z = -2.0f;
+
+    MeshCreate(&gMesh2);
+    gMesh2.mTransform.x = 2.0f;
+    gMesh2.mTransform.y = 0.0f;
+    gMesh2.mTransform.z = -2.0f;
+
+
     //3. Crear la graphics pipeline
     // Vertex y fragment shader como minimo
     CreateGraphicsPipeline();
+    //3.5 Por cada mesh pone la pipeline
+    MeshSetPipeline(&gMesh1, gApp.mGraphicsPipelineShaderProgram);
+
+    MeshSetPipeline(&gMesh2, gApp.mGraphicsPipelineShaderProgram);
     //4. La funcionalidad de la aplicacion (Dibujo)
     MainLoop();
     //5. Limpieza de funciones
