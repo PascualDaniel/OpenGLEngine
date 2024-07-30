@@ -45,7 +45,18 @@ static bool GLCheckErrorStatus(const char* function, int line) {
 }
 #define GLCheck(x) GLClearAllErrors(); x;  GLCheckErrorStatus(#x,__LINE__);
 
-
+/**
+* Devuelve al localizacion de una variable uniforme basada en su nombre
+*/
+int FindUniformLocation(GLuint pipeline, const GLchar* name) {
+    //Devuelve la localizacion de la matriz
+    GLint location = glGetUniformLocation(pipeline, name);
+    if (location < 0) {
+        std::cerr << "Could not find  " << name << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    return location;
+}
 // Dimensiones de la pantalla
 struct App{
     int mScreenHeight = 480;
@@ -162,18 +173,7 @@ void MeshDelete(Mesh3D* mesh) {
     glDeleteBuffers(1, &mesh->mVertexArrayObject);
     glDeleteVertexArrays(1, &mesh->mVertexArrayObject);
 }
-/**
-* Devuelve al localizacion de una variable uniforme basada en su nombre
-*/
-int FindUniformLocation(GLuint pipeline, const GLchar* name) {
-    //Devuelve la localizacion de la matriz
-    GLint location = glGetUniformLocation(pipeline, name);
-    if (location < 0) {
-        std::cerr << "Could not find  " << name << std::endl;
-        exit(EXIT_FAILURE);
-    }
-    return location;
-}
+
 /**
 * Metodo que actualiza objestos
 * 
@@ -213,22 +213,18 @@ void MeshDraw(Mesh3D* mesh) {
     model = glm::rotate(model, glm::radians(mesh->m_uRotate), glm::vec3(0.0f, 1.0f, 0.0f));
     model = glm::scale(model, glm::vec3(mesh->m_uScale, mesh->m_uScale, mesh->m_uScale));
 
-    //Devuelve la localizacion de la matriz
+    //Devuelve la localizacion de la matriz del modelo
     GLint u_ModelMatrixLocation = FindUniformLocation(gApp.mGraphicsPipelineShaderProgram, "u_ModelMatrix");
     glUniformMatrix4fv(u_ModelMatrixLocation, 1, false, &model[0][0]);
     
     
 
-    // Camara
+    // Camara, controla la matriz de la camara
     glm::mat4 view = gApp.mCamera.GetViewMatrix();
-    GLint u_ViewLocation = glGetUniformLocation(gApp.mGraphicsPipelineShaderProgram, "u_ViewMatrix");
-    if (u_ViewLocation >= 0) {
-        glUniformMatrix4fv(u_ViewLocation, 1, false, &view[0][0]);
-    }
-    else {
-        std::cout << "Could not find u_ViewMatrix " << std::endl;
-        exit(EXIT_FAILURE);
-    }
+    GLint u_ViewLocation = FindUniformLocation(gApp.mGraphicsPipelineShaderProgram, "u_ViewMatrix");
+    glUniformMatrix4fv(u_ViewLocation, 1, false, &view[0][0]);
+    
+    
 
     //Projection Transformation 
     glm::mat4 perspective = glm::perspective(glm::radians(45.0f),
@@ -237,38 +233,25 @@ void MeshDraw(Mesh3D* mesh) {
         10.0f);
 
     //Devuelve la localizacion de la perspectiva
-    GLint u_ProjectionLocation = glGetUniformLocation(gApp.mGraphicsPipelineShaderProgram, "u_Projection");
-    if (u_ProjectionLocation >= 0) {
-        glUniformMatrix4fv(u_ProjectionLocation, 1, false, &perspective[0][0]);
-    }
-    else {
-        std::cout << "Could not find u_Projection " << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
+    GLint u_ProjectionLocation = FindUniformLocation(gApp.mGraphicsPipelineShaderProgram, "u_Projection");
+    glUniformMatrix4fv(u_ProjectionLocation, 1, false, &perspective[0][0]);
     /*
     //Textura
-    GLint u_TextureLocation0 = glGetUniformLocation(gApp.mGraphicsPipelineShaderProgram, "u_Tex0");
-    if (u_TextureLocation0 >= 0) {
-        glUniform1i(u_TextureLocation0, 0);
-    }
-    else {
-        std::cout << "Could not find u_Tex0 " << std::endl;
-        exit(EXIT_FAILURE);
-    }
+    GLint u_TextureLocation0 = FindUniformLocation(gApp.mGraphicsPipelineShaderProgram, "u_Tex0");
+    glUniform1i(u_TextureLocation0, 0);
+        
     */
-
 
     //Activa atributos
     glBindVertexArray(mesh->mVertexArrayObject);
 
-    //Selecciona el objeto a activar
-        //glBindTexture(GL_TEXTURE_2D, texture);
+    //Selecciona el objeto a activar    
+    //glBindTexture(GL_TEXTURE_2D, texture);
+    
     //Renderiza los datos
     GLCheck(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
 
     //DeleteTexture(texture);
-
 
     //Para de usar el pipeline (Necesario si solo hay un pipeline)
     glUseProgram(0);
