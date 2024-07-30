@@ -174,17 +174,7 @@ void MeshDelete(Mesh3D* mesh) {
     glDeleteVertexArrays(1, &mesh->mVertexArrayObject);
 }
 
-/**
-* Metodo que actualiza objestos
-* 
-*/
-void MeshUpdate(Mesh3D* mesh) {
-    
 
-
-
-
-}
 /**
 * Metodo que dibuja un objeto
 * Falta txturas
@@ -227,10 +217,7 @@ void MeshDraw(Mesh3D* mesh) {
     
 
     //Projection Transformation 
-    glm::mat4 perspective = glm::perspective(glm::radians(45.0f),
-        (float)gApp.mScreenWidth / (float)gApp.mScreenHeight,
-        0.1f,
-        10.0f);
+    glm::mat4 perspective = gApp.mCamera.GetProjectionMatrix();
 
     //Devuelve la localizacion de la perspectiva
     GLint u_ProjectionLocation = FindUniformLocation(gApp.mGraphicsPipelineShaderProgram, "u_Projection");
@@ -429,13 +416,9 @@ void MainLoop() {
         glClearColor(1.f, 1.f, 0.1f, 1.f);
 
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
-        //Todo lo que OpenGl necesita antes de dibujar
-        MeshUpdate(&gMesh1);      
+    
         // El dibujo
-        MeshDraw(&gMesh1);
-
-        MeshUpdate(&gMesh2);
+        MeshDraw(&gMesh1);      
         MeshDraw(&gMesh2);
         //Actualiza la pantalla
         SDL_GL_SwapWindow(gApp.mGraphicsApplicationWindow);
@@ -463,6 +446,10 @@ int main(int argc, char* args[])
 {
     //1. Inicializar el programa de graficos
     InitialiceProgram(&gApp);
+
+    //Setup Camera
+    gApp.mCamera.SetProjectionMatrix(glm::radians(45.0f),(float)gApp.mScreenWidth / (float)gApp.mScreenHeight,0.1f,10.0f);
+
     //2. Inicializar la jometria
     MeshCreate(&gMesh1);
     gMesh1.mTransform.x = 0.0f;

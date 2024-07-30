@@ -7,8 +7,12 @@ class Camera {
 		///Def Const
 		Camera();
 
+
+		void SetProjectionMatrix(float fovy, float aspect, float near, float far);
 		/// La matriz de la vista que se genera y se devuelve.
 		glm::mat4 GetViewMatrix() const;
+
+		glm::mat4 GetProjectionMatrix() const;
 
 		void MouseLook(int mouseX, int mouseY);
 
@@ -20,6 +24,8 @@ class Camera {
 		void MoveDown(float speed);
 
 	private:
+		glm::mat4 mProjectionMatrix;
+
 		glm::vec3 mEye;
 		glm::vec3 mViewDirection;
 		glm::vec3 mUpVector;

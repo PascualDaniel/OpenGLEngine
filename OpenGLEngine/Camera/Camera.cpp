@@ -6,6 +6,7 @@
 #include <iostream>
 
 Camera::Camera() {
+
 	//Se asume que esta en el origen
 	mEye		   = glm::vec3(0.0f, 0.0f, 0.0f);
 	//Se asume que se mira hacia el mundo
@@ -17,6 +18,12 @@ Camera::Camera() {
 
 glm::mat4 Camera::GetViewMatrix() const {
 	return glm::lookAt(mEye,mEye + mViewDirection, mUpVector);
+}
+glm::mat4 Camera::GetProjectionMatrix() const {
+	return mProjectionMatrix;
+}
+void Camera::SetProjectionMatrix(float fovy,float aspect,float near,float far) {
+	mProjectionMatrix = glm::perspective(fovy, aspect, near, far);
 }
 
 void Camera::MouseLook(int mouseX, int mouseY) {
