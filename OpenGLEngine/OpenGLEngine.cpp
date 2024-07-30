@@ -162,8 +162,46 @@ void MeshDelete(Mesh3D* mesh) {
     glDeleteBuffers(1, &mesh->mVertexArrayObject);
     glDeleteVertexArrays(1, &mesh->mVertexArrayObject);
 }
+/**
+* Devuelve al localizacion de una variable uniforme basada en su nombre
+*/
+int FindUniformLocation(GLuint pipeline, const GLchar* name) {
+    //Devuelve la localizacion de la matriz
+    GLint location = glGetUniformLocation(pipeline, name);
+    if (location < 0) {
+        std::cerr << "Could not find  " << name << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    return location;
+}
+/**
+* Metodo que actualiza objestos
+* 
+*/
 void MeshUpdate(Mesh3D* mesh) {
     
+
+
+
+
+}
+/**
+* Metodo que dibuja un objeto
+* Falta txturas
+*/
+void MeshDraw(Mesh3D* mesh) {
+    //GLuint texture = 0;
+    //CreateTexture(texture);
+
+
+    if (mesh == nullptr) {
+        return;
+    }
+
+    //Setup pipeline que vamos a utilizar
+    glUseProgram(mesh->mPipeline);
+
+
 
     glUseProgram(mesh->mPipeline);
 
@@ -176,14 +214,10 @@ void MeshUpdate(Mesh3D* mesh) {
     model = glm::scale(model, glm::vec3(mesh->m_uScale, mesh->m_uScale, mesh->m_uScale));
 
     //Devuelve la localizacion de la matriz
-    GLint u_ModelMatrixLocation = glGetUniformLocation(gApp.mGraphicsPipelineShaderProgram, "u_ModelMatrix");
-    if (u_ModelMatrixLocation >= 0) {
-        glUniformMatrix4fv(u_ModelMatrixLocation, 1, false, &model[0][0]);
-    }
-    else {
-        std::cout << "Could not find u_ModelMatrix " << std::endl;
-        exit(EXIT_FAILURE);
-    }
+    GLint u_ModelMatrixLocation = FindUniformLocation(gApp.mGraphicsPipelineShaderProgram, "u_ModelMatrix");
+    glUniformMatrix4fv(u_ModelMatrixLocation, 1, false, &model[0][0]);
+    
+    
 
     // Camara
     glm::mat4 view = gApp.mCamera.GetViewMatrix();
@@ -224,27 +258,6 @@ void MeshUpdate(Mesh3D* mesh) {
     }
     */
 
-}
-void MeshSetPipeline(Mesh3D* mesh, GLuint pipeline) {
-    //Pipeline setup
-    mesh->mPipeline = pipeline;
-}
-
-/**
-* Metodo que dibuja un objeto
-* Falta txturas
-*/
-void MeshDraw(Mesh3D* mesh ) {
-    //GLuint texture = 0;
-    //CreateTexture(texture);
-
-
-    if (mesh == nullptr) {
-        return;
-    }
-
-    //Setup pipeline que vamos a utilizar
-    glUseProgram(mesh->mPipeline);
 
     //Activa atributos
     glBindVertexArray(mesh->mVertexArrayObject);
@@ -260,6 +273,12 @@ void MeshDraw(Mesh3D* mesh ) {
     //Para de usar el pipeline (Necesario si solo hay un pipeline)
     glUseProgram(0);
 }
+void MeshSetPipeline(Mesh3D* mesh, GLuint pipeline) {
+    //Pipeline setup
+    mesh->mPipeline = pipeline;
+}
+
+
 //=================================================Globals=================================================
 //=================================================Globals=================================================
 
