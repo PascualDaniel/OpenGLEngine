@@ -78,7 +78,8 @@ App gApp;
 
 
 struct Transform {
-    float x, y, z;
+    glm::mat4 mModelMatrix{ glm::mat4(1.0f) };
+
 
 };
 
@@ -174,6 +175,20 @@ void MeshDelete(Mesh3D* mesh) {
     glDeleteVertexArrays(1, &mesh->mVertexArrayObject);
 }
 
+void MeshTranslate(Mesh3D* mesh, float x, float y, float z) {
+    //Model Transformation 
+
+    mesh->mTransform.mModelMatrix = glm::translate(mesh->mTransform.mModelMatrix, glm::vec3(x, y, z));
+
+
+    //mesh->m_uRotate += 0.5f;
+    //std::cout << "g_uRotate: " << g_uRotate << std::endl;
+
+    
+   // model = glm::rotate(model, glm::radians(mesh->m_uRotate), glm::vec3(0.0f, 1.0f, 0.0f));
+   // model = glm::scale(model, glm::vec3(mesh->m_uScale, mesh->m_uScale, mesh->m_uScale));
+}
+
 
 /**
 * Metodo que dibuja un objeto
@@ -195,17 +210,11 @@ void MeshDraw(Mesh3D* mesh) {
 
     glUseProgram(mesh->mPipeline);
 
-    mesh->m_uRotate += 0.5f;
-    //std::cout << "g_uRotate: " << g_uRotate << std::endl;
-
-    //Model Transformation 
-    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(mesh->mTransform.x, mesh->mTransform.y, mesh->mTransform.z));
-    model = glm::rotate(model, glm::radians(mesh->m_uRotate), glm::vec3(0.0f, 1.0f, 0.0f));
-    model = glm::scale(model, glm::vec3(mesh->m_uScale, mesh->m_uScale, mesh->m_uScale));
+    
 
     //Devuelve la localizacion de la matriz del modelo
     GLint u_ModelMatrixLocation = FindUniformLocation(gApp.mGraphicsPipelineShaderProgram, "u_ModelMatrix");
-    glUniformMatrix4fv(u_ModelMatrixLocation, 1, false, &model[0][0]);
+    glUniformMatrix4fv(u_ModelMatrixLocation, 1, false, &mesh->mTransform.mModelMatrix[0][0]);
     
     
 
@@ -452,14 +461,10 @@ int main(int argc, char* args[])
 
     //2. Inicializar la jometria
     MeshCreate(&gMesh1);
-    gMesh1.mTransform.x = 0.0f;
-    gMesh1.mTransform.y = 0.0f;
-    gMesh1.mTransform.z = -2.0f;
+    MeshTranslate(&gMesh1, 0.0f, 0.0f, -2.0f);
 
     MeshCreate(&gMesh2);
-    gMesh2.mTransform.x = 2.0f;
-    gMesh2.mTransform.y = 0.0f;
-    gMesh2.mTransform.z = -2.0f;
+    MeshTranslate(&gMesh2, 0.0f, 0.0f, -4.0f);
 
 
     //3. Crear la graphics pipeline
