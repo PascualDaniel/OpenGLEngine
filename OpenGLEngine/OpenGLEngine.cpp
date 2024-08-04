@@ -103,8 +103,7 @@ struct Mesh3D {
     Transform mTransform;
 
     float m_uOffset = -2.0f;
-    float m_uRotate = 0.0f;
-    float m_uScale = 0.5f;
+    
 
 };
 
@@ -176,18 +175,23 @@ void MeshDelete(Mesh3D* mesh) {
 }
 
 void MeshTranslate(Mesh3D* mesh, float x, float y, float z) {
-    //Model Transformation 
-
+    //Model Translation
     mesh->mTransform.mModelMatrix = glm::translate(mesh->mTransform.mModelMatrix, glm::vec3(x, y, z));
 
 
     //mesh->m_uRotate += 0.5f;
     //std::cout << "g_uRotate: " << g_uRotate << std::endl;
-
-    
-   // model = glm::rotate(model, glm::radians(mesh->m_uRotate), glm::vec3(0.0f, 1.0f, 0.0f));
    // model = glm::scale(model, glm::vec3(mesh->m_uScale, mesh->m_uScale, mesh->m_uScale));
 }
+void MeshRotate(Mesh3D* mesh, float angle,glm::vec3 axis) {
+    //Model Rotation 
+    mesh->mTransform.mModelMatrix = glm::rotate(mesh->mTransform.mModelMatrix, glm::radians(angle), axis);
+}
+void MeshScale(Mesh3D* mesh, float x, float y, float z) {
+    //Model Rotation 
+    mesh->mTransform.mModelMatrix = glm::scale(mesh->mTransform.mModelMatrix, glm::vec3(x,y,z));
+}
+
 
 
 /**
@@ -425,6 +429,10 @@ void MainLoop() {
         glClearColor(1.f, 1.f, 0.1f, 1.f);
 
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+        static float rotate = 0.5f;       
+        MeshRotate(&gMesh1, rotate, glm::vec3(0.0f, 1.0f, 0.0f));
+
     
         // El dibujo
         MeshDraw(&gMesh1);      
@@ -462,9 +470,11 @@ int main(int argc, char* args[])
     //2. Inicializar la jometria
     MeshCreate(&gMesh1);
     MeshTranslate(&gMesh1, 0.0f, 0.0f, -2.0f);
+    MeshScale(&gMesh1, 1.0f, 1.0f, 1.0f);
 
     MeshCreate(&gMesh2);
     MeshTranslate(&gMesh2, 0.0f, 0.0f, -4.0f);
+    MeshScale(&gMesh2, 1.0f, 2.0f, 1.0f);
 
 
     //3. Crear la graphics pipeline
