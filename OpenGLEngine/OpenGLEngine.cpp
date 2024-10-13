@@ -131,36 +131,6 @@ void InitialiceProgram(App* app) {
 
 }
 
-void CreateTexture(GLuint& texture) {
-    //importar la imagen
-    int widthImg, heightImg, numColCh;
-    unsigned char* bytes = stbi_load("C:/Users/Daniel/Desktop/VFX/GraphicsEngine/OpenGLEngine/textures/container.jpg", &widthImg, &heightImg, &numColCh, 0);
-    //crea la textura
-    glGenTextures(1, &texture);
-    //la enlaza
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    //tipo de interpolacion 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    //tipo de repeticion
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-    //Puede dar error GL_RGB jpegs / GL_RGBA pngs / rgb jpg
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widthImg, heightImg, 0, GL_RGB, GL_UNSIGNED_BYTE, bytes);
-    //añade mipmaps, lo de repetir con distancia mas pequiño
-    glGenerateMipmap(GL_TEXTURE_2D);
-
-    stbi_image_free(bytes);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-}
-
-void DeleteTexture(GLuint& texture) {
-    glDeleteTextures(1, &texture);
-}
-
 
 
 
