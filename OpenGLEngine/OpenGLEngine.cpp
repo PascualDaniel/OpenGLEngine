@@ -24,10 +24,9 @@
 #include "Camera.hpp"
 
 #include "Shader.hpp"
-//include vao ibo and ebo
-#include "VAO/VAO.hpp"
-#include "EBO/EBO.hpp"
-#include "VBO/VBO.hpp"
+
+
+#include "Mesh.hpp"
 
 
 
@@ -52,18 +51,7 @@ static bool GLCheckErrorStatus(const char* function, int line) {
 }
 #define GLCheck(x) GLClearAllErrors(); x;  GLCheckErrorStatus(#x,__LINE__);
 
-/**
-* Devuelve al localizacion de una variable uniforme basada en su nombre
-*/
-int FindUniformLocation(GLuint pipeline, const GLchar* name) {
-    //Devuelve la localizacion de la matriz
-    GLint location = glGetUniformLocation(pipeline, name);
-    if (location < 0) {
-        std::cerr << "Could not find  " << name << std::endl;
-        exit(EXIT_FAILURE);
-    }
-    return location;
-}
+
 // Dimensiones de la pantalla
 struct App{
     int mScreenHeight = 480;
@@ -84,155 +72,11 @@ struct App{
 App gApp;
 
 
-
-
-
-
-//Abstraccion del mesh
-struct Mesh3D {
-public:
-    //Vertex array object VAO
-	VAO vao;
-    //Vertex array object VBO
-	VBO vbo;
-    // Index Buffer Object IBO
-	EBO ebo;
-
-    //graphic pipeline usado con el mesh
-    GLuint mPipeline = 0;
-
-    Transform mTransform;
-
-    float m_uOffset = -2.0f;
-   
-};
-
-/**
-* Pone la geometria durante la vertexspecification por cada mesh
-* es un constucctor
-*/
-void MeshCreate(Mesh3D* mesh) {
-    // Datos de los vértices
-    const std::vector<GLfloat> vertexData{
-        // COORDINATES     /        COLORS      /   TexCoord  //
-        -0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f,    0.0f, 0.0f, // Lower left corner
-        -0.5f,  0.5f, 0.0f,     0.0f, 1.0f, 0.0f,    0.0f, 1.0f, // Upper left corner
-         0.5f,  0.5f, 0.0f,     0.0f, 0.0f, 1.0f,    1.0f, 1.0f, // Upper right corner
-         0.5f, -0.5f, 0.0f,     1.0f, 1.0f, 1.0f,    1.0f, 0.0f  // Lower right corner
-    };
-
-    const std::vector<GLuint> indexBufferData{
-        0, 2, 1, // Upper triangle
-        0, 3, 2  // Lower triangle
-    };
-
-    // Genera y enlaza el VAO
-    mesh->vao.Bind();
-
-    // Genera y enlaza el VBO
-    mesh->vbo = VBO(vertexData);
-    mesh->vbo.Bind();
-
-    // Genera y enlaza el EBO
-    mesh->ebo = EBO(indexBufferData);
-    mesh->ebo.Bind();
-
-    // Configura los atributos del VAO
-    mesh->vao.LinkAttrib(mesh->vbo, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
-    mesh->vao.LinkAttrib(mesh->vbo, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    mesh->vao.LinkAttrib(mesh->vbo, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-
-    // Desvincula el VAO, VBO y EBO
-    mesh->vao.Unbind();
-    mesh->vbo.Unbind();
-    mesh->ebo.Unbind();
-}
-
-void MeshDelete(Mesh3D* mesh) {
-	mesh->vao.Delete();
-	mesh->vbo.Delete();
-	mesh->ebo.Delete();
-
-}
-
-void MeshTranslate(Mesh3D* mesh, float x, float y, float z) {
-    //Model Translation
-    mesh->mTransform.mModelMatrix = glm::translate(mesh->mTransform.mModelMatrix, glm::vec3(x, y, z));
-    //mesh->m_uRotate += 0.5f;
-    //std::cout << "g_uRotate: " << g_uRotate << std::endl;
-   // model = glm::scale(model, glm::vec3(mesh->m_uScale, mesh->m_uScale, mesh->m_uScale));
-}
-void MeshRotate(Mesh3D* mesh, float angle,glm::vec3 axis) {
-    //Model Rotation 
-    mesh->mTransform.mModelMatrix = glm::rotate(mesh->mTransform.mModelMatrix, glm::radians(angle), axis);
-}
-void MeshScale(Mesh3D* mesh, float x, float y, float z) {
-    //Model Rotation 
-    mesh->mTransform.mModelMatrix = glm::scale(mesh->mTransform.mModelMatrix, glm::vec3(x,y,z));
-}
-
-
-
-/**
-* Metodo que dibuja un objeto
-* Falta txturas
-*/
-void MeshDraw(Mesh3D* mesh) {
-    //GLuint texture = 0;
-    //CreateTexture(texture);
-    if (mesh == nullptr) {
-        return;
-    }
-    //Setup pipeline que vamos a utilizar
-    glUseProgram(mesh->mPipeline);
-
-    //Devuelve la localizacion de la matriz del modelo
-    GLint u_ModelMatrixLocation = FindUniformLocation(gApp.mGraphicsPipelineShaderProgram, "u_ModelMatrix");
-    glUniformMatrix4fv(u_ModelMatrixLocation, 1, false, &mesh->mTransform.mModelMatrix[0][0]);
-   
-    // Camara, controla la matriz de la camara
-    glm::mat4 view = gApp.mCamera.GetViewMatrix();
-    GLint u_ViewLocation = FindUniformLocation(gApp.mGraphicsPipelineShaderProgram, "u_ViewMatrix");
-    glUniformMatrix4fv(u_ViewLocation, 1, false, &view[0][0]);
-   
-    //Projection Transformation 
-    glm::mat4 perspective = gApp.mCamera.GetProjectionMatrix();
-
-    //Devuelve la localizacion de la perspectiva
-    GLint u_ProjectionLocation = FindUniformLocation(gApp.mGraphicsPipelineShaderProgram, "u_Projection");
-    glUniformMatrix4fv(u_ProjectionLocation, 1, false, &perspective[0][0]);
-    /*
-    //Textura
-    GLint u_TextureLocation0 = FindUniformLocation(gApp.mGraphicsPipelineShaderProgram, "u_Tex0");
-    glUniform1i(u_TextureLocation0, 0);
-        
-    */
-
-    //Activa atributos
-	mesh->vao.Bind();
-
-    //Selecciona el objeto a activar    
-    //glBindTexture(GL_TEXTURE_2D, texture);
-    
-    //Renderiza los datos
-    GLCheck(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
-
-    //DeleteTexture(texture);
-
-    //Para de usar el pipeline (Necesario si solo hay un pipeline)
-    glUseProgram(0);
-}
-void MeshSetPipeline(Mesh3D* mesh, GLuint pipeline) {
-    //Pipeline setup
-    mesh->mPipeline = pipeline;
-}
-
-
 //=================================================Globals=================================================
 //=================================================Globals=================================================
 
-Mesh3D gMesh1;
-//Mesh3D gMesh2;
+Mesh gMesh1;
+Mesh gMesh2;
 
 
 //=================================================Funcionalidades=================================================
@@ -397,12 +241,12 @@ void MainLoop() {
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
         static float rotate = 0.5f;       
-        MeshRotate(&gMesh1, rotate, glm::vec3(0.0f, 1.0f, 0.0f));
+        gMesh1.Rotate( rotate, glm::vec3(0.0f, 1.0f, 0.0f));
 
     
         // El dibujo
-        MeshDraw(&gMesh1);      
-       // MeshDraw(&gMesh2);
+        gMesh1.Draw(gApp.mCamera);
+        gMesh2.Draw(gApp.mCamera);
         //Actualiza la pantalla
         SDL_GL_SwapWindow(gApp.mGraphicsApplicationWindow);
     }
@@ -412,10 +256,10 @@ void CleanUp() {
     SDL_DestroyWindow(gApp.mGraphicsApplicationWindow);
     gApp.mGraphicsApplicationWindow = nullptr;
 
-    MeshDelete(&gMesh1);
-   // MeshDelete(&gMesh2);
+    gMesh1.Delete();
+    gMesh2.Delete();
 
-    
+ 
 
     //Delete graphisc pipeline
     glDeleteProgram(gApp.mGraphicsPipelineShaderProgram);
@@ -434,22 +278,22 @@ int main(int argc, char* args[])
     gApp.mCamera.SetProjectionMatrix(glm::radians(45.0f),(float)gApp.mScreenWidth / (float)gApp.mScreenHeight,0.1f,10.0f);
 
     //2. Inicializar la jometria
-    MeshCreate(&gMesh1);
-    MeshTranslate(&gMesh1, 0.0f, 0.0f, -2.0f);
-    MeshScale(&gMesh1, 1.0f, 1.0f, 1.0f);
+    gMesh1.Create();
+    gMesh1.Translate( 0.0f, 0.0f, -2.0f);
+    gMesh1.Scale( 1.0f, 1.0f, 1.0f);
 
-    //MeshCreate(&gMesh2);
-   // MeshTranslate(&gMesh2, 0.0f, 0.0f, -4.0f);
-   // MeshScale(&gMesh2, 1.0f, 2.0f, 1.0f);
+    gMesh2.Create();
+    gMesh2.Translate( 0.0f, 0.0f, -4.0f);
+    gMesh2.Scale( 1.0f, 2.0f, 1.0f);
 
 
     //3. Crear la graphics pipeline
     // Vertex y fragment shader como minimo
     CreateGraphicsPipeline();
     //3.5 Por cada mesh pone la pipeline
-    MeshSetPipeline(&gMesh1, gApp.mGraphicsPipelineShaderProgram);
+    gMesh1.SetPipeline( gApp.mGraphicsPipelineShaderProgram);
 
-   // MeshSetPipeline(&gMesh2, gApp.mGraphicsPipelineShaderProgram);
+    gMesh2.SetPipeline( gApp.mGraphicsPipelineShaderProgram);
     //4. La funcionalidad de la aplicacion (Dibujo)
     MainLoop();
     //5. Limpieza de funciones
@@ -459,4 +303,3 @@ int main(int argc, char* args[])
     return 0;
 
 }
-
