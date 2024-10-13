@@ -84,34 +84,27 @@ struct App{
 App gApp;
 
 
-struct Transform {
-    glm::mat4 mModelMatrix{ glm::mat4(1.0f) };
-
-
-};
 
 
 
 
 //Abstraccion del mesh
 struct Mesh3D {
-
+public:
     //Vertex array object VAO
-    GLuint mVertexArrayObject = 0;
-
+	VAO vao;
     //Vertex array object VBO
-    GLuint mVertexBufferObject = 0;
-
+	VBO vbo;
     // Index Buffer Object IBO
-    GLuint mIndexBufferObject = 0;
+	EBO ebo;
+
     //graphic pipeline usado con el mesh
     GLuint mPipeline = 0;
 
     Transform mTransform;
 
     float m_uOffset = -2.0f;
-    
-
+   
 };
 
 /**
@@ -119,84 +112,52 @@ struct Mesh3D {
 * es un constucctor
 */
 void MeshCreate(Mesh3D* mesh) {
-   
-
-    //Lives on the CPU, the reiangle
-    const std::vector<GLfloat> vertexData
-    { //     COORDINATES     /        COLORS      /   TexCoord  //
-   -0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f,	0.0f, 0.0f, // Lower left corner
-   -0.5f,  0.5f, 0.0f,     0.0f, 1.0f, 0.0f,	0.0f, 1.0f, // Upper left corner
-    0.5f,  0.5f, 0.0f,     0.0f, 0.0f, 1.0f,	1.0f, 1.0f, // Upper right corner
-    0.5f, -0.5f, 0.0f,     1.0f, 1.0f, 1.0f,	1.0f, 0.0f  // Lower right corner
+    // Datos de los vértices
+    const std::vector<GLfloat> vertexData{
+        // COORDINATES     /        COLORS      /   TexCoord  //
+        -0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f,    0.0f, 0.0f, // Lower left corner
+        -0.5f,  0.5f, 0.0f,     0.0f, 1.0f, 0.0f,    0.0f, 1.0f, // Upper left corner
+         0.5f,  0.5f, 0.0f,     0.0f, 0.0f, 1.0f,    1.0f, 1.0f, // Upper right corner
+         0.5f, -0.5f, 0.0f,     1.0f, 1.0f, 1.0f,    1.0f, 0.0f  // Lower right corner
     };
 
-    //Settings things on the GPU
-    glGenVertexArrays(1, &mesh->mVertexArrayObject);
-    glBindVertexArray(mesh->mVertexArrayObject);
-
-    //Genera el VBO
-    //glGenBuffers(1, &mesh->mVertexBufferObject);
-    //Selecciona el objeto del buffer con el que trabajaremos
-    //glBindBuffer(GL_ARRAY_BUFFER, mesh->mVertexBufferObject);
-    //Ponemos los datos en el array (traslada de la CPU al la GPU)
-    //glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(GLfloat), vertexData.data(), GL_STATIC_DRAW);
-
-    // Crear el VBO utilizando la clase VBO
-    VBO vbo(vertexData);
-    vbo.Bind();
-
-    const std::vector<GLuint> indexBufferData
-    {
+    const std::vector<GLuint> indexBufferData{
         0, 2, 1, // Upper triangle
-        0, 3, 2 // Lower triangle
+        0, 3, 2  // Lower triangle
     };
 
-    //Crear el Index Buffer Object (IBO i.e. EBO)
-    //glGenBuffers(1, &mesh->mIndexBufferObject);
-    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->mIndexBufferObject);
-    // Poblar el Index Bufer
-    //glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferData.size() * sizeof(GLuint), indexBufferData.data(), GL_STATIC_DRAW);
+    // Genera y enlaza el VAO
+    mesh->vao.Bind();
 
-    // Crear el EBO utilizando la clase EBO
-    EBO ebo(indexBufferData);
-    ebo.Bind();
+    // Genera y enlaza el VBO
+    mesh->vbo = VBO(vertexData);
+    mesh->vbo.Bind();
 
+    // Genera y enlaza el EBO
+    mesh->ebo = EBO(indexBufferData);
+    mesh->ebo.Bind();
 
-    //Dice a openGL como se usa la informacion
-    glEnableVertexAttribArray(0);
-    //Por cada atributo especifica como se mueve por los datos
-    glVertexAttribPointer(0, 3, GL_FLOAT, false, 8 * sizeof(GLfloat), (void*)0);
+    // Configura los atributos del VAO
+    mesh->vao.LinkAttrib(mesh->vbo, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
+    mesh->vao.LinkAttrib(mesh->vbo, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    mesh->vao.LinkAttrib(mesh->vbo, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 
-
-   
-
-    //Linkearlos al VAO
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, false, 8 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 3));
-    //Linkearlos al VAO
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, false, 8 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 6));
-
-    glBindVertexArray(0);
-
-    vbo.Unbind();
-    ebo.Unbind();
-    //Descativar atributos
-    glDisableVertexAttribArray(0);
-    glDisableVertexAttribArray(1);
-
+    // Desvincula el VAO, VBO y EBO
+    mesh->vao.Unbind();
+    mesh->vbo.Unbind();
+    mesh->ebo.Unbind();
 }
 
 void MeshDelete(Mesh3D* mesh) {
-    glDeleteBuffers(1, &mesh->mVertexArrayObject);
-    glDeleteVertexArrays(1, &mesh->mVertexArrayObject);
+	mesh->vao.Delete();
+	mesh->vbo.Delete();
+	mesh->ebo.Delete();
+
 }
 
 void MeshTranslate(Mesh3D* mesh, float x, float y, float z) {
     //Model Translation
     mesh->mTransform.mModelMatrix = glm::translate(mesh->mTransform.mModelMatrix, glm::vec3(x, y, z));
-
-
     //mesh->m_uRotate += 0.5f;
     //std::cout << "g_uRotate: " << g_uRotate << std::endl;
    // model = glm::scale(model, glm::vec3(mesh->m_uScale, mesh->m_uScale, mesh->m_uScale));
@@ -219,34 +180,21 @@ void MeshScale(Mesh3D* mesh, float x, float y, float z) {
 void MeshDraw(Mesh3D* mesh) {
     //GLuint texture = 0;
     //CreateTexture(texture);
-
-
     if (mesh == nullptr) {
         return;
     }
-
     //Setup pipeline que vamos a utilizar
     glUseProgram(mesh->mPipeline);
-
-
-
-    glUseProgram(mesh->mPipeline);
-
-    
 
     //Devuelve la localizacion de la matriz del modelo
     GLint u_ModelMatrixLocation = FindUniformLocation(gApp.mGraphicsPipelineShaderProgram, "u_ModelMatrix");
     glUniformMatrix4fv(u_ModelMatrixLocation, 1, false, &mesh->mTransform.mModelMatrix[0][0]);
-    
-    
-
+   
     // Camara, controla la matriz de la camara
     glm::mat4 view = gApp.mCamera.GetViewMatrix();
     GLint u_ViewLocation = FindUniformLocation(gApp.mGraphicsPipelineShaderProgram, "u_ViewMatrix");
     glUniformMatrix4fv(u_ViewLocation, 1, false, &view[0][0]);
-    
-    
-
+   
     //Projection Transformation 
     glm::mat4 perspective = gApp.mCamera.GetProjectionMatrix();
 
@@ -261,7 +209,7 @@ void MeshDraw(Mesh3D* mesh) {
     */
 
     //Activa atributos
-    glBindVertexArray(mesh->mVertexArrayObject);
+	mesh->vao.Bind();
 
     //Selecciona el objeto a activar    
     //glBindTexture(GL_TEXTURE_2D, texture);
@@ -284,7 +232,7 @@ void MeshSetPipeline(Mesh3D* mesh, GLuint pipeline) {
 //=================================================Globals=================================================
 
 Mesh3D gMesh1;
-Mesh3D gMesh2;
+//Mesh3D gMesh2;
 
 
 //=================================================Funcionalidades=================================================
@@ -454,7 +402,7 @@ void MainLoop() {
     
         // El dibujo
         MeshDraw(&gMesh1);      
-        MeshDraw(&gMesh2);
+       // MeshDraw(&gMesh2);
         //Actualiza la pantalla
         SDL_GL_SwapWindow(gApp.mGraphicsApplicationWindow);
     }
@@ -465,9 +413,9 @@ void CleanUp() {
     gApp.mGraphicsApplicationWindow = nullptr;
 
     MeshDelete(&gMesh1);
-    MeshDelete(&gMesh2);
+   // MeshDelete(&gMesh2);
 
- 
+    
 
     //Delete graphisc pipeline
     glDeleteProgram(gApp.mGraphicsPipelineShaderProgram);
@@ -490,9 +438,9 @@ int main(int argc, char* args[])
     MeshTranslate(&gMesh1, 0.0f, 0.0f, -2.0f);
     MeshScale(&gMesh1, 1.0f, 1.0f, 1.0f);
 
-    MeshCreate(&gMesh2);
-    MeshTranslate(&gMesh2, 0.0f, 0.0f, -4.0f);
-    MeshScale(&gMesh2, 1.0f, 2.0f, 1.0f);
+    //MeshCreate(&gMesh2);
+   // MeshTranslate(&gMesh2, 0.0f, 0.0f, -4.0f);
+   // MeshScale(&gMesh2, 1.0f, 2.0f, 1.0f);
 
 
     //3. Crear la graphics pipeline
@@ -501,7 +449,7 @@ int main(int argc, char* args[])
     //3.5 Por cada mesh pone la pipeline
     MeshSetPipeline(&gMesh1, gApp.mGraphicsPipelineShaderProgram);
 
-    MeshSetPipeline(&gMesh2, gApp.mGraphicsPipelineShaderProgram);
+   // MeshSetPipeline(&gMesh2, gApp.mGraphicsPipelineShaderProgram);
     //4. La funcionalidad de la aplicacion (Dibujo)
     MainLoop();
     //5. Limpieza de funciones
@@ -511,3 +459,4 @@ int main(int argc, char* args[])
     return 0;
 
 }
+
