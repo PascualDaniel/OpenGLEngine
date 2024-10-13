@@ -24,6 +24,13 @@
 #include "Camera.hpp"
 
 #include "Shader.hpp"
+//include vao ibo and ebo
+#include "VAO/VAO.hpp"
+#include "EBO/EBO.hpp"
+#include "VBO/VBO.hpp"
+
+
+
 
 //=================================================Errores=================================================
 
@@ -128,12 +135,15 @@ void MeshCreate(Mesh3D* mesh) {
     glBindVertexArray(mesh->mVertexArrayObject);
 
     //Genera el VBO
-    glGenBuffers(1, &mesh->mVertexBufferObject);
+    //glGenBuffers(1, &mesh->mVertexBufferObject);
     //Selecciona el objeto del buffer con el que trabajaremos
-    glBindBuffer(GL_ARRAY_BUFFER, mesh->mVertexBufferObject);
+    //glBindBuffer(GL_ARRAY_BUFFER, mesh->mVertexBufferObject);
     //Ponemos los datos en el array (traslada de la CPU al la GPU)
-    glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(GLfloat), vertexData.data(), GL_STATIC_DRAW);
+    //glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(GLfloat), vertexData.data(), GL_STATIC_DRAW);
 
+    // Crear el VBO utilizando la clase VBO
+    VBO vbo(vertexData);
+    vbo.Bind();
 
     const std::vector<GLuint> indexBufferData
     {
@@ -142,10 +152,14 @@ void MeshCreate(Mesh3D* mesh) {
     };
 
     //Crear el Index Buffer Object (IBO i.e. EBO)
-    glGenBuffers(1, &mesh->mIndexBufferObject);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->mIndexBufferObject);
+    //glGenBuffers(1, &mesh->mIndexBufferObject);
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->mIndexBufferObject);
     // Poblar el Index Bufer
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferData.size() * sizeof(GLuint), indexBufferData.data(), GL_STATIC_DRAW);
+    //glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferData.size() * sizeof(GLuint), indexBufferData.data(), GL_STATIC_DRAW);
+
+    // Crear el EBO utilizando la clase EBO
+    EBO ebo(indexBufferData);
+    ebo.Bind();
 
 
     //Dice a openGL como se usa la informacion
@@ -153,22 +167,26 @@ void MeshCreate(Mesh3D* mesh) {
     //Por cada atributo especifica como se mueve por los datos
     glVertexAttribPointer(0, 3, GL_FLOAT, false, 8 * sizeof(GLfloat), (void*)0);
 
+
+   
+
     //Linkearlos al VAO
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 3, GL_FLOAT, false, 8 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 3));
-
-
-
     //Linkearlos al VAO
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 2, GL_FLOAT, false, 8 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 6));
 
     glBindVertexArray(0);
+
+    vbo.Unbind();
+    ebo.Unbind();
     //Descativar atributos
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
 
 }
+
 void MeshDelete(Mesh3D* mesh) {
     glDeleteBuffers(1, &mesh->mVertexArrayObject);
     glDeleteVertexArrays(1, &mesh->mVertexArrayObject);
