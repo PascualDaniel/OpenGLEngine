@@ -7,9 +7,19 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "Camera.hpp"
+#include"../VAO/VAO.hpp"
+#include"../EBO/EBO.hpp"
+
 
 class Mesh {
 public:
+    std::vector <GLfloat> vertices;
+    std::vector <GLuint> indices;
+
+    VAO VAO;
+
+    Mesh(std::vector <GLfloat>& vertices, std::vector <GLuint>& indices);
+
     void Create();
     void Delete();
     void Translate(float x, float y, float z);
@@ -23,6 +33,8 @@ private:
     GLuint mVertexArrayObject;
     GLuint mVertexBufferObject;
     GLuint mIndexBufferObject;
+
+
     GLuint mPipeline;
     
     struct Transform {

@@ -75,8 +75,31 @@ App gApp;
 //=================================================Globals=================================================
 //=================================================Globals=================================================
 
-Mesh gMesh1;
-Mesh gMesh2;
+
+// Define los vértices y los índices para las mallas
+std::vector<GLfloat> vertices1 = { //     COORDINATES     /        COLORS      /   TexCoord  //
+    -0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f,	0.0f, 0.0f, // Lower left corner
+    -0.5f,  0.5f, 0.0f,     0.0f, 1.0f, 0.0f,	0.0f, 1.0f, // Upper left corner
+    0.5f,  0.5f, 0.0f,     0.0f, 0.0f, 1.0f,	1.0f, 1.0f, // Upper right corner
+    0.5f, -0.5f, 0.0f,     1.0f, 1.0f, 1.0f,	1.0f, 0.0f  // Lower right corner
+};
+
+std::vector<GLuint> indices1 = {
+        0, 2, 1, // Upper triangle
+        0, 3, 2 // Lower triangle
+};
+
+std::vector<GLfloat> vertices2 = { //     COORDINATES     /        COLORS      /   TexCoord  //
+    -0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f,	0.0f, 0.0f, // Lower left corner
+    -0.5f,  0.5f, 0.0f,     0.0f, 1.0f, 0.0f,	0.0f, 1.0f, // Upper left corner
+    0.5f,  0.5f, 0.0f,     0.0f, 0.0f, 1.0f,	1.0f, 1.0f, // Upper right corner
+    0.5f, -0.5f, 0.0f,     1.0f, 1.0f, 1.0f,	1.0f, 0.0f  // Lower right corner
+};;
+
+std::vector<GLuint> indices2 = {
+        0, 2, 1, // Upper triangle
+        0, 3, 2 // Lower triangle
+};
 
 
 //=================================================Funcionalidades=================================================
@@ -177,14 +200,6 @@ void Input() {
     if (state[SDL_SCANCODE_LCTRL]) {
         gApp.mCamera.MoveDown(speed);
     }
-    if (state[SDL_SCANCODE_UP]) {
-        gMesh1.m_uOffset += 0.01f;
-        std::cout << "g_uOffset: " << gMesh1.m_uOffset << std::endl;
-
-    }if (state[SDL_SCANCODE_DOWN]) {
-        gMesh1.m_uOffset -= 0.01f;
-        std::cout << "g_uOffset: " << gMesh1.m_uOffset << std::endl;
-    }
     if (state[SDL_SCANCODE_ESCAPE]) {
         std::cout << "Bye :3" << std::endl;
         gApp.mQuit = true;
@@ -199,6 +214,18 @@ void MainLoop() {
     SDL_WarpMouseInWindow(gApp.mGraphicsApplicationWindow, gApp.mScreenWidth / 2, gApp.mScreenHeight / 2);
     SDL_SetRelativeMouseMode(SDL_TRUE);
 
+
+    //2. Inicializar la jometria
+    //gMesh1.Create();
+    Mesh gMesh1(vertices1, indices1);
+    gMesh1.Translate(0.0f, 0.0f, -2.0f);
+    gMesh1.Scale(1.0f, 1.0f, 1.0f);
+    gMesh1.SetPipeline(gApp.mGraphicsPipelineShaderProgram);
+    //gMesh2.Create();
+    Mesh gMesh2(vertices2, indices2);
+    gMesh2.Translate(0.0f, 0.0f, -4.0f);
+    gMesh2.Scale(1.0f, 2.0f, 1.0f);
+    gMesh2.SetPipeline(gApp.mGraphicsPipelineShaderProgram);
     while (!gApp.mQuit) {
         Input();
 
@@ -220,16 +247,13 @@ void MainLoop() {
         //Actualiza la pantalla
         SDL_GL_SwapWindow(gApp.mGraphicsApplicationWindow);
     }
+    gMesh1.Delete();
+    gMesh2.Delete();
 }
 
 void CleanUp() {
     SDL_DestroyWindow(gApp.mGraphicsApplicationWindow);
     gApp.mGraphicsApplicationWindow = nullptr;
-
-    gMesh1.Delete();
-    gMesh2.Delete();
-
- 
 
     //Delete graphisc pipeline
     glDeleteProgram(gApp.mGraphicsPipelineShaderProgram);
@@ -239,7 +263,11 @@ void CleanUp() {
 }
 
 
+
+
 int main(int argc, char* args[])
+
+
 {
     //1. Inicializar el programa de graficos
     InitialiceProgram(&gApp);
@@ -247,23 +275,9 @@ int main(int argc, char* args[])
     //Setup Camera
     gApp.mCamera.SetProjectionMatrix(glm::radians(45.0f),(float)gApp.mScreenWidth / (float)gApp.mScreenHeight,0.1f,10.0f);
 
-    //2. Inicializar la jometria
-    gMesh1.Create();
-    gMesh1.Translate( 0.0f, 0.0f, -2.0f);
-    gMesh1.Scale( 1.0f, 1.0f, 1.0f);
-
-    gMesh2.Create();
-    gMesh2.Translate( 0.0f, 0.0f, -4.0f);
-    gMesh2.Scale( 1.0f, 2.0f, 1.0f);
-
-
     //3. Crear la graphics pipeline
     // Vertex y fragment shader como minimo
     CreateGraphicsPipeline();
-    //3.5 Por cada mesh pone la pipeline
-    gMesh1.SetPipeline( gApp.mGraphicsPipelineShaderProgram);
-
-    gMesh2.SetPipeline( gApp.mGraphicsPipelineShaderProgram);
     //4. La funcionalidad de la aplicacion (Dibujo)
     MainLoop();
     //5. Limpieza de funciones
