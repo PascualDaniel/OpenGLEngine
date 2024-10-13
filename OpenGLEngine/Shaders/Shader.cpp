@@ -11,6 +11,9 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath) {
 void Shader::use() {
     glUseProgram(gGraphicsPipeline);
 }
+void Shader::drop() {
+	glDeleteProgram(gGraphicsPipeline);
+}
 
 void Shader::setInt(const std::string& name, int value) {
     glUniform1i(glGetUniformLocation(gGraphicsPipeline, name.c_str()), value);

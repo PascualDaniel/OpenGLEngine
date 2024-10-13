@@ -12,10 +12,13 @@ class Shader {
 public:
     Shader(const std::string& vertexPath, const std::string& fragmentPath); // constructor
     void use(); // method to use the shader
+	void drop(); // method to delete the shader
     void setInt(const std::string& name, int value); // method to set int uniform
     void setFloat(const std::string& name, float value); // method to set float uniform
     
     GLuint getGraphicsPipeline();
+
+  
     
 
 private:
