@@ -3,11 +3,11 @@
 #include <iostream>
 
 
-Mesh::Mesh(std::vector <GLfloat>& vertices, std::vector <GLuint>& indices)
+Mesh::Mesh(std::vector <GLfloat>& vertices, std::vector <GLuint>& indices, Texture& texture)
 {
     Mesh::vertices = vertices;
     Mesh::indices = indices;
-
+    Mesh::texture = texture;
 
     VAO.Bind();
     // Generates Vertex Buffer Object and links it to vertices
@@ -15,56 +15,18 @@ Mesh::Mesh(std::vector <GLfloat>& vertices, std::vector <GLuint>& indices)
     // Generates Element Buffer Object and links it to indices
     EBO EBO(indices);
     // Links VBO attributes such as coordinates and colors to VAO
-    VAO.LinkAttrib(VBO, 0, 3, GL_FLOAT, sizeof(vertices), (void*)0);
-    VAO.LinkAttrib(VBO, 1, 3, GL_FLOAT, sizeof(vertices), (void*)(3 * sizeof(float)));
-    VAO.LinkAttrib(VBO, 2, 3, GL_FLOAT, sizeof(vertices), (void*)(6 * sizeof(float)));
+    VAO.LinkAttrib(VBO, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0); // Posición
+    VAO.LinkAttrib(VBO, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float))); // Color
+    VAO.LinkAttrib(VBO, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float))); // Coordenadas de textura
+
+    //VAO.LinkAttrib(VBO, 3, 2, GL_FLOAT, sizeof(vertices), (void*)(6 * sizeof(float)));
     // Unbind all to prevent accidentally modifying them
     VAO.Unbind();
     VBO.Unbind();
     EBO.Unbind();
 }
 
-void Mesh::Create() {
-    const std::vector<GLfloat> vertexData
-    { //     COORDINATES     /        COLORS      /   TexCoord  //
-    -0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f,	0.0f, 0.0f, // Lower left corner
-    -0.5f,  0.5f, 0.0f,     0.0f, 1.0f, 0.0f,	0.0f, 1.0f, // Upper left corner
-    0.5f,  0.5f, 0.0f,     0.0f, 0.0f, 1.0f,	1.0f, 1.0f, // Upper right corner
-    0.5f, -0.5f, 0.0f,     1.0f, 1.0f, 1.0f,	1.0f, 0.0f  // Lower right corner
-    };
 
-    const std::vector<GLuint> indexBufferData
-    {
-        0, 2, 1, // Upper triangle
-        0, 3, 2 // Lower triangle
-    };
-
-    glGenVertexArrays(1, &mVertexArrayObject);
-    glBindVertexArray(mVertexArrayObject);
-
-    glGenBuffers(1, &mVertexBufferObject);
-    glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferObject);
-    glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(GLfloat), vertexData.data(), GL_STATIC_DRAW);
-
-    
-
-    glGenBuffers(1, &mIndexBufferObject);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBufferObject);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferData.size() * sizeof(GLuint), indexBufferData.data(), GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, false, 8 * sizeof(GLfloat), (void*)0);
-
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, false, 8 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 3));
-
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, false, 8 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 6));
-
-    glBindVertexArray(0);
-    glDisableVertexAttribArray(0);
-    glDisableVertexAttribArray(1);
-}
 
 void Mesh::Delete() {
     //glDeleteBuffers(1, &mVertexArrayObject);
@@ -99,6 +61,9 @@ int FindUniformLocation(GLuint pipeline, const GLchar* name) {
 }
 
 void Mesh::Draw(const Camera& camera) {
+
+    
+
     glUseProgram(mPipeline);
 
     GLint u_ModelMatrixLocation = glGetUniformLocation(mPipeline, "u_ModelMatrix");
@@ -116,13 +81,20 @@ void Mesh::Draw(const Camera& camera) {
     GLint u_ProjectionLocation = FindUniformLocation(mPipeline, "u_Projection");
     glUniformMatrix4fv(u_ProjectionLocation, 1, false, &perspective[0][0]);
 
+    
 	VAO.Bind();
+    //Textura
+	texture.texUnit(mPipeline, "u_Tex0", 0);
+	texture.Bind();
 
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
+
+	
+
     //Para de usar el pipeline (Necesario si solo hay un pipeline)
     glUseProgram(0);
-
+    texture.Unbind();
     VAO.Unbind();
 }
 

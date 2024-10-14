@@ -9,18 +9,20 @@
 #include "Camera.hpp"
 #include"../VAO/VAO.hpp"
 #include"../EBO/EBO.hpp"
+#include <Texture.hpp>
 
 
 class Mesh {
 public:
     std::vector <GLfloat> vertices;
     std::vector <GLuint> indices;
+    Texture texture;
 
     VAO VAO;
 
-    Mesh(std::vector <GLfloat>& vertices, std::vector <GLuint>& indices);
+    Mesh(std::vector <GLfloat>& vertices, std::vector <GLuint>& indices, Texture& texture);
 
-    void Create();
+  
     void Delete();
     void Translate(float x, float y, float z);
     void Rotate(float angle, glm::vec3 axis);
@@ -30,11 +32,7 @@ public:
     float m_uOffset;
 
 private:
-    GLuint mVertexArrayObject;
-    GLuint mVertexBufferObject;
-    GLuint mIndexBufferObject;
-
-
+    
     GLuint mPipeline;
     
     struct Transform {

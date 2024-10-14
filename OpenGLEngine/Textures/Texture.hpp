@@ -1,20 +1,33 @@
 #ifndef TEXTURE_HPP
 #define TEXTURE_HPP
 
+
+#include <iostream>
 #include <glad/glad.h> // include glad to get all the required OpenGL headers
 
-#include "Shader.hpp"
 #include "stb_image.h"
-#include <iostream>
+
+#include "Shader.hpp"
+
 
 class Texture {
 public:
-  
 	GLuint ID;
+	const char* type;
+	GLuint unit;
 
+	Texture();
 
-	void CreateTexture(GLuint& texture, const char* filePath);
-	void DeleteTexture(GLuint& texture);
+	Texture(const char* image, const char* texType, GLuint slot, GLenum format, GLenum pixelType);
+
+	// Assigns a texture unit to a texture
+	void texUnit(GLuint& pipeline, const char* uniform, GLuint unit);
+	// Binds a texture
+	void Bind();
+	// Unbinds a texture
+	void Unbind();
+	// Deletes a texture
+	void Delete();
 
 };
 

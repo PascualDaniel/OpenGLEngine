@@ -16,8 +16,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+//#define STB_IMAGE_IMPLEMENTATION
+//#include "stb_image.h"
 
 //=================================================Propias=================================================
 //=================================================Propias=================================================
@@ -27,7 +27,7 @@
 
 
 #include "Mesh.hpp"
-
+#include "Texture.hpp"
 
 
 
@@ -101,7 +101,7 @@ std::vector<GLuint> indices2 = {
         0, 3, 2 // Lower triangle
 };
 
-
+const char* texturePath = "C:/Users/Daniel/Desktop/VFX/GraphicsEngine/OpenGLEngine/textures/container.jpg";
 //=================================================Funcionalidades=================================================
 
 
@@ -151,6 +151,7 @@ void InitialiceProgram(App* app) {
         exit(1);
     }
     GetOpenGLVersionInfo();
+
 
 }
 
@@ -215,17 +216,23 @@ void MainLoop() {
     SDL_SetRelativeMouseMode(SDL_TRUE);
 
 
+	//Texture const (const char* image, const char* texType, GLuint slot, GLenum format, GLenum pixelType);
+    Texture gTexture1(texturePath, "diffuse", 0, GL_RGB, GL_UNSIGNED_BYTE);
+    Texture gTexture2(texturePath, "diffuse", 0, GL_RGB, GL_UNSIGNED_BYTE);
+
+
     //2. Inicializar la jometria
-    //gMesh1.Create();
-    Mesh gMesh1(vertices1, indices1);
+    Mesh gMesh1(vertices1, indices1, gTexture1);
     gMesh1.Translate(0.0f, 0.0f, -2.0f);
     gMesh1.Scale(1.0f, 1.0f, 1.0f);
     gMesh1.SetPipeline(gApp.mGraphicsPipelineShaderProgram);
-    //gMesh2.Create();
-    Mesh gMesh2(vertices2, indices2);
+
+    Mesh gMesh2(vertices2, indices2, gTexture2);
     gMesh2.Translate(0.0f, 0.0f, -4.0f);
     gMesh2.Scale(1.0f, 2.0f, 1.0f);
     gMesh2.SetPipeline(gApp.mGraphicsPipelineShaderProgram);
+
+
     while (!gApp.mQuit) {
         Input();
 
@@ -244,6 +251,8 @@ void MainLoop() {
         // El dibujo
         gMesh1.Draw(gApp.mCamera);
         gMesh2.Draw(gApp.mCamera);
+
+
         //Actualiza la pantalla
         SDL_GL_SwapWindow(gApp.mGraphicsApplicationWindow);
     }

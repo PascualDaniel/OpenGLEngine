@@ -10,6 +10,7 @@
 
 class Shader {
 public:
+    unsigned int ID; // ID of the shader
     Shader(const std::string& vertexPath, const std::string& fragmentPath); // constructor
     void use(); // method to use the shader
 	void drop(); // method to delete the shader
@@ -22,7 +23,7 @@ public:
     
 
 private:
-    unsigned int ID; // ID of the shader
+    
     std::string vertexShaderSource;
     std::string fragmentShaderSource;
     // Program Object for our shaders (Graphics pipeline)
