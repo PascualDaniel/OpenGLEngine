@@ -87,7 +87,7 @@ void Mesh::Draw(const Camera& camera) {
 	texture.texUnit(mPipeline, "u_Tex0", 0);
 	texture.Bind();
 
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 
 
 	

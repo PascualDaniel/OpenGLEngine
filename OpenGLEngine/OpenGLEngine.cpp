@@ -89,16 +89,30 @@ std::vector<GLuint> indices1 = {
         0, 3, 2 // Lower triangle
 };
 
-std::vector<GLfloat> vertices2 = { //     COORDINATES     /        COLORS      /   TexCoord  //
-    -0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f,	0.0f, 0.0f, // Lower left corner
-    -0.5f,  0.5f, 0.0f,     0.0f, 1.0f, 0.0f,	0.0f, 1.0f, // Upper left corner
-    0.5f,  0.5f, 0.0f,     0.0f, 0.0f, 1.0f,	1.0f, 1.0f, // Upper right corner
-    0.5f, -0.5f, 0.0f,     1.0f, 1.0f, 1.0f,	1.0f, 0.0f  // Lower right corner
-};;
+
+//Vertices 2 piramide
+
+// Vértices de una pirámide
+std::vector<GLfloat> vertices2 = {
+    // Base de la pirámide
+   -0.5f, 0.0f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // Vértice 0
+    0.5f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // Vértice 1
+    0.5f, 0.0f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, // Vértice 2
+   -0.5f, 0.0f,  0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, // Vértice 3
+   // Punta de la pirámide
+    0.0f, 1.0f,  0.0f, 1.0f, 0.0f, 1.0f, 0.5f, 0.5f  // Vértice 4
+
+};
 
 std::vector<GLuint> indices2 = {
-        0, 2, 1, // Upper triangle
-        0, 3, 2 // Lower triangle
+    // Base de la pirámide
+    0, 1, 2,
+    0, 2, 3,
+    // Caras de la pirámide
+    0, 1, 4,
+    1, 2, 4,
+    2, 3, 4,
+    3, 0, 4
 };
 
 const char* texturePath = "C:/Users/Daniel/Desktop/VFX/GraphicsEngine/OpenGLEngine/textures/container.jpg";
@@ -236,8 +250,8 @@ void MainLoop() {
     while (!gApp.mQuit) {
         Input();
 
-        glDisable(GL_DEPTH_TEST);
-        glDisable(GL_CULL_FACE);
+        glEnable(GL_DEPTH_TEST);
+       // glEnable(GL_CULL_FACE);
 
         glViewport(0, 0, gApp.mScreenWidth, gApp.mScreenHeight);
         glClearColor(1.f, 1.f, 0.1f, 1.f);
