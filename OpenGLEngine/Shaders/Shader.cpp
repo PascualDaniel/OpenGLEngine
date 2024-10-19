@@ -1,7 +1,7 @@
 #include "Shader.hpp"
 
 Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath) {
-
+  
     vertexShaderSource = LoadShaderAsString(vertexPath);
     fragmentShaderSource = LoadShaderAsString(fragmentPath);
 
@@ -96,10 +96,11 @@ GLuint Shader::CompileShader(GLuint type, const std::string& shadersource) {
 GLuint Shader::CreateShaderProgram(const std::string& vertexshaderssource, const std::string& fragmentshadersource) {
     //Create graphics pipeline
     GLuint programObject = glCreateProgram();
-
+	ID = programObject;
     //Compila los shaders
     GLuint myVertexShader = CompileShader(GL_VERTEX_SHADER, vertexshaderssource);
     GLuint myFragmentShader = CompileShader(GL_FRAGMENT_SHADER, fragmentshadersource);
+
 
     glAttachShader(programObject, myVertexShader);
     glAttachShader(programObject, myFragmentShader);

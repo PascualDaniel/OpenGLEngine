@@ -28,6 +28,7 @@
 
 #include "Mesh.hpp"
 #include "Texture.hpp"
+#include <glm/gtc/type_ptr.hpp>
 
 
 
@@ -50,6 +51,27 @@ static bool GLCheckErrorStatus(const char* function, int line) {
     return false;
 }
 #define GLCheck(x) GLClearAllErrors(); x;  GLCheckErrorStatus(#x,__LINE__);
+
+
+void CheckShaderCompilation(GLuint shader, const std::string& type) {
+    GLint success;
+    GLchar infoLog[1024];
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(shader, 1024, NULL, infoLog);
+        std::cout << "ERROR::SHADER_COMPILATION_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+    }
+}
+
+void CheckProgramLinking(GLuint program) {
+    GLint success;
+    GLchar infoLog[1024];
+    glGetProgramiv(program, GL_LINK_STATUS, &success);
+    if (!success) {
+        glGetProgramInfoLog(program, 1024, NULL, infoLog);
+        std::cout << "ERROR::PROGRAM_LINKING_ERROR\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+    }
+}
 
 
 // Dimensiones de la pantalla
@@ -262,15 +284,21 @@ void MainLoop() {
     Texture gTexture2(texturePath, "diffuse", 0, GL_RGB, GL_UNSIGNED_BYTE);
 
 
+
+
     //3. Crear la graphics pipeline
-    
-    Shader gShader = Shader("../shaders/vert.glsl", "../shaders/frag.glsl");
+    Shader gShader("../shaders/vert.glsl", "../shaders/frag.glsl");
+    CheckShaderCompilation(gShader.ID, "VERTEX");
+    CheckShaderCompilation(gShader.ID, "FRAGMENT");
+    CheckProgramLinking(gShader.ID);
     gApp.mGraphicsPipelineShaders.push_back(gShader);
 
-	Shader lightShader("../shaders/lightvert.glsl", "../shaders/lightfrag.glsl");
-	gApp.mGraphicsPipelineShaders.push_back(lightShader);
+    Shader lightShader("../shaders/lightvert.glsl", "../shaders/lightfrag.glsl");
+    CheckShaderCompilation(lightShader.ID, "VERTEX");
+    CheckShaderCompilation(lightShader.ID, "FRAGMENT");
+    CheckProgramLinking(lightShader.ID);
+    gApp.mGraphicsPipelineShaders.push_back(lightShader);
 	
-
 
     //2. Inicializar la jometria
     Mesh gMesh1(vertices1, indices1, gTexture1);
@@ -286,11 +314,23 @@ void MainLoop() {
     Mesh lightCube(verticesCube, indicesCube, gTexture1);
 	lightCube.Translate(0.0f, 2.0f, -2.0f);
 	lightCube.Scale(0.2f, 0.2f, 0.2f);
-	lightCube.SetPipeline(lightShader.getGraphicsPipeline());
+	lightCube.SetPipeline(gApp.mGraphicsPipelineShaders[1].getGraphicsPipeline());
+
+    glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    glm::vec3 lightPos = glm::vec3(0.0f, 2.0f, -2.0f);
+    glm::mat4 lightModel = glm::mat4(1.0f);
+    lightModel = glm::translate(lightModel, lightPos);
+
+    glm::vec3 pyramidPos = glm::vec3(0.0f, 0.0f, -2.0f);
+    glm::mat4 pyramidModel = glm::mat4(1.0f);
+    pyramidModel = glm::translate(pyramidModel, pyramidPos);
+
+	
+    
 
 
-    gApp.mCamera.ProjectionMatrix(gApp.mGraphicsPipelineShaders[0], "camMatrix");
-    gApp.mCamera.ProjectionMatrix(gApp.mGraphicsPipelineShaders[1], "camMatrix");
+    gApp.mCamera.ProjectionMatrix(gApp.mGraphicsPipelineShaders[0], "u_ViewMatrix");
+    gApp.mCamera.ProjectionMatrix(gApp.mGraphicsPipelineShaders[1], "u_ViewMatrix");
 
 
     glEnable(GL_DEPTH_TEST);
@@ -313,6 +353,14 @@ void MainLoop() {
         gMesh1.Draw(gApp.mCamera);
         gMesh2.Draw(gApp.mCamera);
 		lightCube.Draw(gApp.mCamera);
+
+        gApp.mGraphicsPipelineShaders[1].use();
+        glUniformMatrix4fv(glGetUniformLocation(gApp.mGraphicsPipelineShaders[1].ID, "u_ModelMatrix"), 1, GL_FALSE, glm::value_ptr(lightModel));
+        glUniform4f(glGetUniformLocation(gApp.mGraphicsPipelineShaders[1].ID, "u_lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
+        gApp.mGraphicsPipelineShaders[0].use();
+        glUniformMatrix4fv(glGetUniformLocation(gApp.mGraphicsPipelineShaders[0].ID, "u_ModelMatrix"), 1, GL_FALSE, glm::value_ptr(pyramidModel));
+        glUniform4f(glGetUniformLocation(gApp.mGraphicsPipelineShaders[0].ID, "u_lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
+        // glUniform3f(glGetUniformLocation(gApp.mGraphicsPipelineShaders[0].ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 
 
         //Actualiza la pantalla

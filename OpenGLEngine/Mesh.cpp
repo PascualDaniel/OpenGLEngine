@@ -19,7 +19,7 @@ Mesh::Mesh(std::vector <GLfloat>& vertices, std::vector <GLuint>& indices, Textu
     VAO.LinkAttrib(VBO, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float))); // Color
     VAO.LinkAttrib(VBO, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float))); // Coordenadas de textura
 
-    //VAO.LinkAttrib(VBO, 3, 2, GL_FLOAT, sizeof(vertices), (void*)(6 * sizeof(float)));
+    VAO.LinkAttrib(VBO, 3, 3, GL_FLOAT, sizeof(vertices), (void*)(6 * sizeof(float)));
     // Unbind all to prevent accidentally modifying them
     VAO.Unbind();
     VBO.Unbind();
@@ -80,6 +80,8 @@ void Mesh::Draw(const Camera& camera) {
     //Devuelve la localizacion de la perspectiva
     GLint u_ProjectionLocation = FindUniformLocation(mPipeline, "u_Projection");
     glUniformMatrix4fv(u_ProjectionLocation, 1, false, &perspective[0][0]);
+
+
 
     
 	VAO.Bind();
