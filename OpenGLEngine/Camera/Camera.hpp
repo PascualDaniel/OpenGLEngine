@@ -1,6 +1,7 @@
 #ifndef CAMERA_HPP
 #define CAMERA_HPP
 #include <glm/glm.hpp>
+#include "../Shaders/Shader.hpp"
 class Camera {
 	public:	
 
@@ -13,6 +14,8 @@ class Camera {
 		glm::mat4 GetViewMatrix() const;
 
 		glm::mat4 GetProjectionMatrix() const;
+
+		void ProjectionMatrix(Shader& shader, const char* uniform);
 
 		void MouseLook(int mouseX, int mouseY);
 

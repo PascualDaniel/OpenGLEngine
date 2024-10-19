@@ -63,7 +63,8 @@ struct App{
     bool mQuit = false; //Si true, cierra la app
 
     // Program Object for our shaders (Graphics pipeline)
-    GLuint mGraphicsPipelineShaderProgram = 0;
+    std::vector<Shader> mGraphicsPipelineShaders;
+
 
     //Camara global Unica
     Camera mCamera;
@@ -114,6 +115,34 @@ std::vector<GLuint> indices2 = {
     2, 3, 4,
     3, 0, 4
 };
+
+//Light source cube
+// Vértices de un cubo
+std::vector<GLfloat> verticesCube = {
+    // Coordenadas        // Colores         // Coordenadas de textura
+    -0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+     0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,
+     0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 1.0f,  1.0f, 1.0f,
+    -0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 1.0f,  0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+     0.5f, -0.5f,  0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  1.0f, 1.0f,
+    -0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 1.0f,  0.0f, 1.0f
+};
+
+std::vector<GLuint> indicesCube = {
+    0, 1, 2, 2, 3, 0, // Cara trasera
+    4, 5, 6, 6, 7, 4, // Cara delantera
+    0, 1, 5, 5, 4, 0, // Cara inferior
+    2, 3, 7, 7, 6, 2, // Cara superior
+    0, 3, 7, 7, 4, 0, // Cara izquierda
+    1, 2, 6, 6, 5, 1  // Cara derecha
+};
+
+
+
+
+
 
 const char* texturePath = "C:/Users/Daniel/Desktop/VFX/GraphicsEngine/OpenGLEngine/textures/container.jpg";
 //=================================================Funcionalidades=================================================
@@ -173,9 +202,7 @@ void InitialiceProgram(App* app) {
 
 
 void CreateGraphicsPipeline() {
-    Shader gShader = Shader("path/to/vertexShader.glsl", "path/to/fragmentShader.glsl");
-
-    gApp.mGraphicsPipelineShaderProgram = gShader.getGraphicsPipeline();
+    
 }
 
 void Input() {
@@ -235,23 +262,43 @@ void MainLoop() {
     Texture gTexture2(texturePath, "diffuse", 0, GL_RGB, GL_UNSIGNED_BYTE);
 
 
+    //3. Crear la graphics pipeline
+    
+    Shader gShader = Shader("../shaders/vert.glsl", "../shaders/frag.glsl");
+    gApp.mGraphicsPipelineShaders.push_back(gShader);
+
+	Shader lightShader("../shaders/lightvert.glsl", "../shaders/lightfrag.glsl");
+	gApp.mGraphicsPipelineShaders.push_back(lightShader);
+	
+
+
     //2. Inicializar la jometria
     Mesh gMesh1(vertices1, indices1, gTexture1);
     gMesh1.Translate(0.0f, 0.0f, -2.0f);
     gMesh1.Scale(1.0f, 1.0f, 1.0f);
-    gMesh1.SetPipeline(gApp.mGraphicsPipelineShaderProgram);
+    gMesh1.SetPipeline(gApp.mGraphicsPipelineShaders[0].getGraphicsPipeline());
 
     Mesh gMesh2(vertices2, indices2, gTexture2);
     gMesh2.Translate(0.0f, 0.0f, -4.0f);
     gMesh2.Scale(1.0f, 2.0f, 1.0f);
-    gMesh2.SetPipeline(gApp.mGraphicsPipelineShaderProgram);
+    gMesh2.SetPipeline(gApp.mGraphicsPipelineShaders[0].getGraphicsPipeline());
+
+    Mesh lightCube(verticesCube, indicesCube, gTexture1);
+	lightCube.Translate(0.0f, 2.0f, -2.0f);
+	lightCube.Scale(0.2f, 0.2f, 0.2f);
+	lightCube.SetPipeline(lightShader.getGraphicsPipeline());
 
 
+    gApp.mCamera.ProjectionMatrix(gApp.mGraphicsPipelineShaders[0], "camMatrix");
+    gApp.mCamera.ProjectionMatrix(gApp.mGraphicsPipelineShaders[1], "camMatrix");
+
+
+    glEnable(GL_DEPTH_TEST);
+    // glEnable(GL_CULL_FACE);
     while (!gApp.mQuit) {
         Input();
 
-        glEnable(GL_DEPTH_TEST);
-       // glEnable(GL_CULL_FACE);
+        
 
         glViewport(0, 0, gApp.mScreenWidth, gApp.mScreenHeight);
         glClearColor(1.f, 1.f, 0.1f, 1.f);
@@ -265,6 +312,7 @@ void MainLoop() {
         // El dibujo
         gMesh1.Draw(gApp.mCamera);
         gMesh2.Draw(gApp.mCamera);
+		lightCube.Draw(gApp.mCamera);
 
 
         //Actualiza la pantalla
@@ -272,6 +320,7 @@ void MainLoop() {
     }
     gMesh1.Delete();
     gMesh2.Delete();
+	lightCube.Delete();
 }
 
 void CleanUp() {
@@ -279,7 +328,9 @@ void CleanUp() {
     gApp.mGraphicsApplicationWindow = nullptr;
 
     //Delete graphisc pipeline
-    glDeleteProgram(gApp.mGraphicsPipelineShaderProgram);
+    for (auto& shader : gApp.mGraphicsPipelineShaders) {
+        glDeleteProgram(shader.getGraphicsPipeline());
+    }
 
 
     SDL_Quit();
@@ -298,11 +349,16 @@ int main(int argc, char* args[])
     //Setup Camera
     gApp.mCamera.SetProjectionMatrix(glm::radians(45.0f),(float)gApp.mScreenWidth / (float)gApp.mScreenHeight,0.1f,10.0f);
 
-    //3. Crear la graphics pipeline
+    
+
+	//3. Crear el pipeline de graficos
     // Vertex y fragment shader como minimo
-    CreateGraphicsPipeline();
+    //CreateGraphicsPipeline();
+    
     //4. La funcionalidad de la aplicacion (Dibujo)
     MainLoop();
+
+   
     //5. Limpieza de funciones
     CleanUp();
 

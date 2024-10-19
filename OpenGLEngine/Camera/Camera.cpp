@@ -4,6 +4,7 @@
 #include <glm/gtx/rotate_vector.hpp>
 
 #include <iostream>
+#include <glm/gtc/type_ptr.hpp>
 
 Camera::Camera() {
 
@@ -23,8 +24,25 @@ glm::mat4 Camera::GetProjectionMatrix() const {
 	return mProjectionMatrix;
 }
 void Camera::SetProjectionMatrix(float fovy,float aspect,float near,float far) {
-	mProjectionMatrix = glm::perspective(fovy, aspect, near, far);
+
+	// Initializes matrices since otherwise they will be the null matrix
+	glm::mat4 view = glm::mat4(1.0f);
+	glm::mat4 projection = glm::mat4(1.0f);
+
+	// Makes camera look in the right direction from the right position
+	view = glm::lookAt(mEye, mEye + mViewDirection, mUpVector);
+	// Adds perspective to the scene
+	projection = glm::perspective(fovy, aspect, near, far);
+
+	// Sets new camera matrix
+	mProjectionMatrix = projection * view;
 }
+void Camera::ProjectionMatrix(Shader& shader, const char* uniform)
+{
+	// Exports camera matrix
+	glUniformMatrix4fv(glGetUniformLocation(shader.ID, uniform), 1, GL_FALSE, glm::value_ptr(mProjectionMatrix));
+}
+
 
 void Camera::MouseLook(int mouseX, int mouseY) {
 	std::cout << "Mouser: " << mouseX << std::endl;

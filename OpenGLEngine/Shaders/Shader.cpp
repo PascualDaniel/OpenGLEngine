@@ -2,8 +2,8 @@
 
 Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath) {
 
-    vertexShaderSource = LoadShaderAsString("../shaders/vert.glsl");
-    fragmentShaderSource = LoadShaderAsString("../shaders/frag.glsl");
+    vertexShaderSource = LoadShaderAsString(vertexPath);
+    fragmentShaderSource = LoadShaderAsString(fragmentPath);
 
     gGraphicsPipeline =  CreateShaderProgram(vertexShaderSource, fragmentShaderSource);
 }
