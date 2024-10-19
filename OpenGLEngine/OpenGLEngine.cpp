@@ -100,11 +100,11 @@ App gApp;
 
 
 // Define los vértices y los índices para las mallas
-std::vector<GLfloat> vertices1 = { //     COORDINATES     /        COLORS      /   TexCoord  //
-    -0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f,	0.0f, 0.0f, // Lower left corner
-    -0.5f,  0.5f, 0.0f,     0.0f, 1.0f, 0.0f,	0.0f, 1.0f, // Upper left corner
-    0.5f,  0.5f, 0.0f,     0.0f, 0.0f, 1.0f,	1.0f, 1.0f, // Upper right corner
-    0.5f, -0.5f, 0.0f,     1.0f, 1.0f, 1.0f,	1.0f, 0.0f  // Lower right corner
+std::vector<GLfloat> vertices1 = { //     COORDINATES     /        COLORS      /   TexCoord  /       NORMALS      //
+    -0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f,	0.0f, 0.0f,    0.0f, 0.0f, 1.0f, // Lower left corner
+    -0.5f,  0.5f, 0.0f,     0.0f, 1.0f, 0.0f,	0.0f, 1.0f,    0.0f, 0.0f, 1.0f, // Upper left corner
+    0.5f,  0.5f, 0.0f,     0.0f, 0.0f, 1.0f,	1.0f, 1.0f,    0.0f, 0.0f, 1.0f, // Upper right corner
+    0.5f, -0.5f, 0.0f,     1.0f, 1.0f, 1.0f,	1.0f, 0.0f,    0.0f, 0.0f, 1.0f  // Lower right corner
 };
 
 std::vector<GLuint> indices1 = {
@@ -115,41 +115,52 @@ std::vector<GLuint> indices1 = {
 
 //Vertices 2 piramide
 
-// Vértices de una pirámide
-std::vector<GLfloat> vertices2 = {
-    // Base de la pirámide
-   -0.5f, 0.0f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // Vértice 0
-    0.5f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // Vértice 1
-    0.5f, 0.0f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, // Vértice 2
-   -0.5f, 0.0f,  0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, // Vértice 3
-   // Punta de la pirámide
-    0.0f, 1.0f,  0.0f, 1.0f, 0.0f, 1.0f, 0.5f, 0.5f  // Vértice 4
 
+// Vértices de una pirámide
+std::vector<GLfloat> vertices2 = { //     COORDINATES     /        COLORS          /    TexCoord   /        NORMALS       //
+    -0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f, 	 0.0f, 0.0f,      0.0f, -1.0f, 0.0f, // Bottom side
+    -0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	 0.0f, 5.0f,      0.0f, -1.0f, 0.0f, // Bottom side
+     0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	 5.0f, 5.0f,      0.0f, -1.0f, 0.0f, // Bottom side
+     0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	 5.0f, 0.0f,      0.0f, -1.0f, 0.0f, // Bottom side
+
+    -0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f, 	 0.0f, 0.0f,     -0.8f, 0.5f,  0.0f, // Left Side
+    -0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	 5.0f, 0.0f,     -0.8f, 0.5f,  0.0f, // Left Side
+     0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	 2.5f, 5.0f,     -0.8f, 0.5f,  0.0f, // Left Side
+
+    -0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	 5.0f, 0.0f,      0.0f, 0.5f, -0.8f, // Non-facing side
+     0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	 0.0f, 0.0f,      0.0f, 0.5f, -0.8f, // Non-facing side
+     0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	 2.5f, 5.0f,      0.0f, 0.5f, -0.8f, // Non-facing side
+
+     0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	 0.0f, 0.0f,      0.8f, 0.5f,  0.0f, // Right side
+     0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	 5.0f, 0.0f,      0.8f, 0.5f,  0.0f, // Right side
+     0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	 2.5f, 5.0f,      0.8f, 0.5f,  0.0f, // Right side
+
+     0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	 5.0f, 0.0f,      0.0f, 0.5f,  0.8f, // Facing side
+    -0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f, 	 0.0f, 0.0f,      0.0f, 0.5f,  0.8f, // Facing side
+     0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	 2.5f, 5.0f,      0.0f, 0.5f,  0.8f  // Facing side
 };
 
 std::vector<GLuint> indices2 = {
-    // Base de la pirámide
-    0, 1, 2,
-    0, 2, 3,
-    // Caras de la pirámide
-    0, 1, 4,
-    1, 2, 4,
-    2, 3, 4,
-    3, 0, 4
+    0, 1, 2, // Bottom side
+    0, 2, 3, // Bottom side
+    4, 6, 5, // Left side
+    7, 9, 8, // Non-facing side
+    10, 12, 11, // Right side
+    13, 15, 14 // Facing side
 };
 
 //Light source cube
 // Vértices de un cubo
 std::vector<GLfloat> verticesCube = {
-    // Coordenadas        // Colores         // Coordenadas de textura
-    -0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 1.0f,  1.0f, 1.0f,
-    -0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 1.0f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  1.0f, 1.0f,
-    -0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 1.0f,  0.0f, 1.0f
+    // Coordenadas        // Colores         // Coordenadas de textura  // Normales
+    -0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f,  -1.0f, -1.0f, -1.0f,
+     0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,   1.0f, -1.0f, -1.0f,
+     0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 1.0f,  1.0f, 1.0f,   1.0f,  1.0f, -1.0f,
+    -0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 1.0f,  0.0f, 1.0f,  -1.0f,  1.0f, -1.0f,
+    -0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f,  -1.0f, -1.0f,  1.0f,
+     0.5f, -0.5f,  0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,   1.0f, -1.0f,  1.0f,
+     0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  1.0f, 1.0f,   1.0f,  1.0f,  1.0f,
+    -0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 1.0f,  0.0f, 1.0f,  -1.0f,  1.0f,  1.0f
 };
 
 std::vector<GLuint> indicesCube = {
@@ -301,27 +312,29 @@ void MainLoop() {
 	
 
     //2. Inicializar la jometria
-    Mesh gMesh1(vertices1, indices1, gTexture1);
-    gMesh1.Translate(0.0f, 0.0f, -2.0f);
-    gMesh1.Scale(1.0f, 1.0f, 1.0f);
-    gMesh1.SetPipeline(gApp.mGraphicsPipelineShaders[0].getGraphicsPipeline());
+   // Mesh gMesh1(vertices1, indices1, gTexture1);
+    //gMesh1.Translate(0.0f, 0.0f, 0.0f);
+    //gMesh1.Scale(1.0f, 1.0f, 1.0f);
+    //gMesh1.SetPipeline(gApp.mGraphicsPipelineShaders[0].getGraphicsPipeline());
 
     Mesh gMesh2(vertices2, indices2, gTexture2);
-    gMesh2.Translate(0.0f, 0.0f, -4.0f);
-    gMesh2.Scale(1.0f, 2.0f, 1.0f);
+    gMesh2.Translate(0.0f, 0.0f, 0.0f);
+    gMesh2.Scale(1.0f, 1.0f, 1.0f);
     gMesh2.SetPipeline(gApp.mGraphicsPipelineShaders[0].getGraphicsPipeline());
 
     Mesh lightCube(verticesCube, indicesCube, gTexture1);
-	lightCube.Translate(0.0f, 2.0f, -2.0f);
+	lightCube.Translate(0.5f, 0.5f, 0.5f);
 	lightCube.Scale(0.2f, 0.2f, 0.2f);
 	lightCube.SetPipeline(gApp.mGraphicsPipelineShaders[1].getGraphicsPipeline());
 
+
+
     glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-    glm::vec3 lightPos = glm::vec3(0.0f, 2.0f, -2.0f);
+    glm::vec3 lightPos = glm::vec3(0.5f, 0.5f, 0.5f);
     glm::mat4 lightModel = glm::mat4(1.0f);
     lightModel = glm::translate(lightModel, lightPos);
 
-    glm::vec3 pyramidPos = glm::vec3(0.0f, 0.0f, -2.0f);
+    glm::vec3 pyramidPos = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::mat4 pyramidModel = glm::mat4(1.0f);
     pyramidModel = glm::translate(pyramidModel, pyramidPos);
 
@@ -346,11 +359,11 @@ void MainLoop() {
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
         static float rotate = 0.5f;       
-        gMesh1.Rotate( rotate, glm::vec3(0.0f, 1.0f, 0.0f));
+      //  gMesh1.Rotate( rotate, glm::vec3(0.0f, 1.0f, 0.0f));
 
     
         // El dibujo
-        gMesh1.Draw(gApp.mCamera);
+        //gMesh1.Draw(gApp.mCamera);
         gMesh2.Draw(gApp.mCamera);
 		lightCube.Draw(gApp.mCamera);
 
@@ -360,13 +373,13 @@ void MainLoop() {
         gApp.mGraphicsPipelineShaders[0].use();
         glUniformMatrix4fv(glGetUniformLocation(gApp.mGraphicsPipelineShaders[0].ID, "u_ModelMatrix"), 1, GL_FALSE, glm::value_ptr(pyramidModel));
         glUniform4f(glGetUniformLocation(gApp.mGraphicsPipelineShaders[0].ID, "u_lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
-        // glUniform3f(glGetUniformLocation(gApp.mGraphicsPipelineShaders[0].ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
+        glUniform3f(glGetUniformLocation(gApp.mGraphicsPipelineShaders[0].ID, "u_lightPos"), lightPos.x, lightPos.y, lightPos.z);
 
 
         //Actualiza la pantalla
         SDL_GL_SwapWindow(gApp.mGraphicsApplicationWindow);
     }
-    gMesh1.Delete();
+    //gMesh1.Delete();
     gMesh2.Delete();
 	lightCube.Delete();
 }

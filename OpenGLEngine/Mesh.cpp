@@ -15,11 +15,11 @@ Mesh::Mesh(std::vector <GLfloat>& vertices, std::vector <GLuint>& indices, Textu
     // Generates Element Buffer Object and links it to indices
     EBO EBO(indices);
     // Links VBO attributes such as coordinates and colors to VAO
-    VAO.LinkAttrib(VBO, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0); // Posición
-    VAO.LinkAttrib(VBO, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float))); // Color
-    VAO.LinkAttrib(VBO, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float))); // Coordenadas de textura
+    VAO.LinkAttrib(VBO, 0, 3, GL_FLOAT, 11 * sizeof(float), (void*)0); // Posición
+    VAO.LinkAttrib(VBO, 1, 3, GL_FLOAT,11 * sizeof(float), (void*)(3 * sizeof(float))); // Color
+    VAO.LinkAttrib(VBO, 2, 2, GL_FLOAT, 11 * sizeof(float), (void*)(6 * sizeof(float))); // Coordenadas de textura
 
-    VAO.LinkAttrib(VBO, 3, 3, GL_FLOAT, sizeof(vertices), (void*)(6 * sizeof(float)));
+    VAO.LinkAttrib(VBO, 3, 3, GL_FLOAT, 11*sizeof(float), (void*)(8 * sizeof(float)));
     // Unbind all to prevent accidentally modifying them
     VAO.Unbind();
     VBO.Unbind();
@@ -65,7 +65,7 @@ void Mesh::Draw(const Camera& camera) {
     
 
     glUseProgram(mPipeline);
-
+    glUniform3f(glGetUniformLocation(mPipeline, "u_viewPos"), camera.mEye.x, camera.mEye.y, camera.mEye.z);
     GLint u_ModelMatrixLocation = glGetUniformLocation(mPipeline, "u_ModelMatrix");
     glUniformMatrix4fv(u_ModelMatrixLocation, 1, false, &mTransform.mModelMatrix[0][0]);
 

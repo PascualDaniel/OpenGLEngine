@@ -3,6 +3,7 @@
 layout(location=0) in vec3 position;
 layout(location=1) in vec3 vertexColors;
 layout(location=2) in vec2 aTex;
+layout(location = 3) in vec3 aNormal;
 
 uniform mat4 u_ModelMatrix;
 uniform mat4 u_ViewMatrix;

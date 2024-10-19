@@ -7,7 +7,7 @@ class Camera {
 
 		///Def Const
 		Camera();
-
+		glm::vec3 mEye;
 
 		void SetProjectionMatrix(float fovy, float aspect, float near, float far);
 		/// La matriz de la vista que se genera y se devuelve.
@@ -29,7 +29,7 @@ class Camera {
 	private:
 		glm::mat4 mProjectionMatrix;
 
-		glm::vec3 mEye;
+		
 		glm::vec3 mViewDirection;
 		glm::vec3 mUpVector;
 
