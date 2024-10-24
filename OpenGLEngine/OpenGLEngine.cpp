@@ -285,7 +285,7 @@ void Input() {
 
 }
 
-//prueba
+//prueba 2 
 void MainLoop() {
     //Encerrrar al raton dentro de la pantalla
     SDL_WarpMouseInWindow(gApp.mGraphicsApplicationWindow, gApp.mScreenWidth / 2, gApp.mScreenHeight / 2);
