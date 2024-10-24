@@ -3,11 +3,11 @@
 #include <iostream>
 
 
-Mesh::Mesh(std::vector <GLfloat>& vertices, std::vector <GLuint>& indices, Texture& texture)
+Mesh::Mesh(std::vector <GLfloat>& vertices, std::vector <GLuint>& indices,  std::vector <Texture>& textures)
 {
     Mesh::vertices = vertices;
     Mesh::indices = indices;
-    Mesh::texture = texture;
+    Mesh::textures = textures;
 
     VAO.Bind();
     // Generates Vertex Buffer Object and links it to vertices
@@ -86,8 +86,12 @@ void Mesh::Draw(const Camera& camera) {
     
 	VAO.Bind();
     //Textura
-	texture.texUnit(mPipeline, "u_Tex0", 0);
-	texture.Bind();
+    for (unsigned int i = 0; i < textures.size(); i++) {
+        std::string num = std::to_string(i);
+        std::string text = "u_Tex" + num;
+        textures[i].texUnit(mPipeline, text.c_str(), i);
+        textures[i].Bind();
+    }
 
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 
@@ -96,7 +100,9 @@ void Mesh::Draw(const Camera& camera) {
 
     //Para de usar el pipeline (Necesario si solo hay un pipeline)
     glUseProgram(0);
-    texture.Unbind();
+	for (unsigned int i = 0; i < textures.size(); i++) {
+		textures[i].Unbind();
+	}
     VAO.Unbind();
 }
 

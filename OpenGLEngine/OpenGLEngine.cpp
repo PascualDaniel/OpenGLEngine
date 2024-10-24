@@ -178,6 +178,8 @@ std::vector<GLuint> indicesCube = {
 
 
 const char* texturePath = "C:/Users/Daniel/Desktop/VFX/GraphicsEngine/OpenGLEngine/textures/container.jpg";
+const char* texturePlankPath = "C:/Users/Daniel/Desktop/VFX/GraphicsEngine/OpenGLEngine/textures/planks.png";
+const char* texturePlankSpecPath = "C:/Users/Daniel/Desktop/VFX/GraphicsEngine/OpenGLEngine/textures/planksSpec.png";
 //=================================================Funcionalidades=================================================
 
 
@@ -291,11 +293,24 @@ void MainLoop() {
 
 
 	//Texture const (const char* image, const char* texType, GLuint slot, GLenum format, GLenum pixelType);
-    Texture gTexture1(texturePath, "diffuse", 0, GL_RGB, GL_UNSIGNED_BYTE);
-    Texture gTexture2(texturePath, "diffuse", 0, GL_RGB, GL_UNSIGNED_BYTE);
+    Texture gTexture1[]
+    {
+        Texture(texturePath, "diffuse", 0, GL_RGB, GL_UNSIGNED_BYTE)
+	};
+    Texture gTexture2[]
+    {
+        Texture(texturePath, "diffuse", 0, GL_RGB, GL_UNSIGNED_BYTE)
+    };
+    Texture textures[]
+    {
+        Texture(texturePlankPath, "diffuse", 0, GL_RGBA, GL_UNSIGNED_BYTE),
+      
+        Texture(texturePlankSpecPath, "specular", 1, GL_RED, GL_UNSIGNED_BYTE)
+    };
 
-
-
+    std::vector <Texture> tex(textures, textures + sizeof(textures) / sizeof(Texture));
+    std::vector <Texture> tex2(gTexture1, gTexture1 + sizeof(gTexture1) / sizeof(Texture));
+    std::vector <Texture> tex1(gTexture2, gTexture2 + sizeof(gTexture2) / sizeof(Texture));
 
     //3. Crear la graphics pipeline
     Shader gShader("../shaders/vert.glsl", "../shaders/frag.glsl");
@@ -317,12 +332,12 @@ void MainLoop() {
     //gMesh1.Scale(1.0f, 1.0f, 1.0f);
     //gMesh1.SetPipeline(gApp.mGraphicsPipelineShaders[0].getGraphicsPipeline());
 
-    Mesh gMesh2(vertices2, indices2, gTexture2);
+    Mesh gMesh2(vertices2, indices2, tex);
     gMesh2.Translate(0.0f, 0.0f, 0.0f);
     gMesh2.Scale(1.0f, 1.0f, 1.0f);
     gMesh2.SetPipeline(gApp.mGraphicsPipelineShaders[0].getGraphicsPipeline());
 
-    Mesh lightCube(verticesCube, indicesCube, gTexture1);
+    Mesh lightCube(verticesCube, indicesCube, tex2);
 	lightCube.Translate(0.5f, 0.5f, 0.5f);
 	lightCube.Scale(0.2f, 0.2f, 0.2f);
 	lightCube.SetPipeline(gApp.mGraphicsPipelineShaders[1].getGraphicsPipeline());

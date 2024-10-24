@@ -16,11 +16,11 @@ class Mesh {
 public:
     std::vector <GLfloat> vertices;
     std::vector <GLuint> indices;
-    Texture texture;
+    std::vector <Texture> textures;
 
     VAO VAO;
 
-    Mesh(std::vector <GLfloat>& vertices, std::vector <GLuint>& indices, Texture& texture);
+    Mesh(std::vector <GLfloat>& vertices, std::vector <GLuint>& indices, std::vector <Texture>& textures);
 
   
     void Delete();
