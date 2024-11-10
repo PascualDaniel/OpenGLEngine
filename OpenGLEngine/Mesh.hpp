@@ -2,9 +2,14 @@
 #ifndef MESH3D_HPP
 #define MESH3D_HPP
 
+
 #include <vector>
+#include<string>
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glad/glad.h>
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtc/matrix_transform.hpp>
 #include "Camera.hpp"
 #include"../VAO/VAO.hpp"
@@ -12,31 +17,28 @@
 #include <Texture.hpp>
 
 
-class Mesh {
+
+class Mesh
+{
 public:
-    std::vector <Vertex> vertices;
-    std::vector <GLuint> indices;
-    std::vector <Texture> textures;
+	std::vector <Vertex> vertices;
+	std::vector <GLuint> indices;
+	std::vector <Texture> textures;
+	// Store VAO in public so it can be used in the Draw function
+	VAO VAO;
 
-    VAO VAO;
+	// Initializes the mesh
+	Mesh(std::vector <Vertex>& vertices, std::vector <GLuint>& indices, std::vector <Texture>& textures);
 
-    Mesh(std::vector <Vertex>& vertices, std::vector <GLuint>& indices, std::vector <Texture>& textures);
-
-  
-    void Delete();
-    void Translate(float x, float y, float z);
-    void Rotate(float angle, glm::vec3 axis);
-    void Scale(float x, float y, float z);
-    void Draw(const Camera& camera);
-    void SetPipeline(GLuint pipeline);
-    float m_uOffset;
-
-private:
-    
-    GLuint mPipeline;
-    
-    struct Transform {
-        glm::mat4 mModelMatrix = glm::mat4(1.0f);
-    } mTransform;
+	// Draws the mesh
+	void Draw
+	(
+		 Shader& shader,
+		 Camera& camera,
+		glm::mat4 matrix = glm::mat4(1.0f),
+		glm::vec3 translation = glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::quat rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f),
+		glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f)
+	);
 };
 #endif // MESH3D_HPP

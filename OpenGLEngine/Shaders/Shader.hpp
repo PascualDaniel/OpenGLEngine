@@ -1,38 +1,30 @@
 #ifndef SHADER_HPP
 #define SHADER_HPP
 
-#include <glad/glad.h> // include glad to get all the required OpenGL headers
+#include<glad/glad.h>
+#include<string>
+#include<fstream>
+#include<sstream>
+#include<iostream>
+#include<cerrno>
 
-#include <string>
-#include <fstream>
-#include <sstream>
-#include <iostream>
+std::string get_file_contents(const char* filename);
 
-class Shader {
+class Shader
+{
 public:
-    unsigned int ID; // ID of the shader
-    Shader(const std::string& vertexPath, const std::string& fragmentPath); // constructor
-    void use(); // method to use the shader
-	void drop(); // method to delete the shader
-    void setInt(const std::string& name, int value); // method to set int uniform
-    void setFloat(const std::string& name, float value); // method to set float uniform
-    
-    GLuint getGraphicsPipeline();
+	// Reference ID of the Shader Program
+	GLuint ID;
+	// Constructor that build the Shader Program from 2 different shaders
+	Shader(const char* vertexFile, const char* fragmentFile);
 
-  
-    
-
+	// Activates the Shader Program
+	void Activate();
+	// Deletes the Shader Program
+	void Delete();
 private:
-    
-    std::string vertexShaderSource;
-    std::string fragmentShaderSource;
-    // Program Object for our shaders (Graphics pipeline)
-    GLuint gGraphicsPipeline = 0;
-
-
-    std::string LoadShaderAsString(const std::string& filename);
-    GLuint CompileShader(GLuint type, const std::string& shadersource);
-    GLuint CreateShaderProgram(const std::string& vertexshaderssource, const std::string& fragmentshadersource);
+	// Checks if the different Shaders have compiled properly
+	void compileErrors(unsigned int shader, const char* type);
 };
 
 

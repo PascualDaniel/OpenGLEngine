@@ -18,10 +18,10 @@ public:
 
 	
 
-	Texture(const char* image, const char* texType, GLuint slot, GLenum format, GLenum pixelType);
+	Texture(const char* image, const char* texType, GLuint slot);
 
 	// Assigns a texture unit to a texture
-	void texUnit(GLuint& pipeline, const char* uniform, GLuint unit);
+	void texUnit(Shader& shader, const char* uniform, GLuint unit);
 	// Binds a texture
 	void Bind();
 	// Unbinds a texture

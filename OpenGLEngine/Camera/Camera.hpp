@@ -1,40 +1,49 @@
 #ifndef CAMERA_HPP
 #define CAMERA_HPP
-#include <glm/glm.hpp>
+
+
+#include<glad/glad.h>
+#include<GLFW/glfw3.h>
+#define GLM_ENABLE_EXPERIMENTAL
+#include<glm/glm.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include<glm/gtc/matrix_transform.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include<glm/gtc/type_ptr.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include<glm/gtx/rotate_vector.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include<glm/gtx/vector_angle.hpp>
 #include "../Shaders/Shader.hpp"
-class Camera {
-	public:	
+class Camera
+{
+public:
+	// Stores the main vectors of the camera
+	glm::vec3 Position;
+	glm::vec3 Orientation = glm::vec3(0.0f, 0.0f, -1.0f);
+	glm::vec3 Up = glm::vec3(0.0f, 1.0f, 0.0f);
+	glm::mat4 cameraMatrix = glm::mat4(1.0f);
 
-		///Def Const
-		Camera();
-		glm::vec3 mEye;
+	// Prevents the camera from jumping around when first clicking left click
+	bool firstClick = true;
 
-		void SetProjectionMatrix(float fovy, float aspect, float near, float far);
-		/// La matriz de la vista que se genera y se devuelve.
-		glm::mat4 GetViewMatrix() const;
+	// Stores the width and height of the window
+	int width;
+	int height;
 
-		glm::mat4 GetProjectionMatrix() const;
+	// Adjust the speed of the camera and it's sensitivity when looking around
+	float speed = 0.1f;
+	float sensitivity = 100.0f;
 
-		void ProjectionMatrix(Shader& shader, const char* uniform);
+	// Camera constructor to set up initial values
+	Camera(int width, int height, glm::vec3 position);
 
-		void MouseLook(int mouseX, int mouseY);
-
-		void MoveForward(float speed);
-		void MoveBackward(float speed);
-		void MoveLeft(float speed);
-		void MoveRight(float speed);
-		void MoveUp(float speed);
-		void MoveDown(float speed);
-
-	private:
-		glm::mat4 mProjectionMatrix;
-
-		
-		glm::vec3 mViewDirection;
-		glm::vec3 mUpVector;
-
-		glm::vec2 mOldMousePosition;
-		
+	// Updates the camera matrix to the Vertex Shader
+	void updateMatrix(float FOVdeg, float nearPlane, float farPlane);
+	// Exports the camera matrix to a shader
+	void Matrix(Shader& shader, const char* uniform);
+	// Handles camera inputs
+	void Inputs(GLFWwindow* window);
 };
 
 #endif
