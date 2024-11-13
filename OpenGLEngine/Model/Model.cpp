@@ -1,21 +1,4 @@
-
 #include"Model.hpp"
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <string>
-
-std::string get_file_contents(const std::string& filename) {
-	std::ifstream file(filename);
-	if (!file) {
-		std::cerr << "Could not open the file: " << filename << std::endl;
-		return "";
-	}
-
-	std::ostringstream contents;
-	contents << file.rdbuf();  // Read the whole file into the stream
-	return contents.str();
-}
 
 Model::Model(const char* file)
 {
@@ -274,7 +257,7 @@ std::vector<Texture> Model::getTextures()
 		if (!skip)
 		{
 			// Load diffuse texture
-			if (texPath.find("baseColor") != std::string::npos)
+			if (texPath.find("baseColor") != std::string::npos || texPath.find("diffuse") != std::string::npos)
 			{
 				Texture diffuse = Texture((fileDirectory + texPath).c_str(), "diffuse", loadedTex.size());
 				textures.push_back(diffuse);
@@ -282,7 +265,7 @@ std::vector<Texture> Model::getTextures()
 				loadedTexName.push_back(texPath);
 			}
 			// Load specular texture
-			else if (texPath.find("metallicRoughness") != std::string::npos)
+			else if (texPath.find("metallicRoughness") != std::string::npos || texPath.find("specular") != std::string::npos)
 			{
 				Texture specular = Texture((fileDirectory + texPath).c_str(), "specular", loadedTex.size());
 				textures.push_back(specular);
