@@ -76,10 +76,12 @@ int main()
 	* Also note that this requires C++17, so go to Project Properties, C/C++, Language, and select C++17
 	*/
 	std::string parentDir = (fs::current_path().fs::path::parent_path()).string();
-	std::string modelPath = "/resources/bunny/scene.gltf";
+	std::string treesPath = "/resources/trees/scene.gltf";
+	std::string groundPath = "/resources/ground/scene.gltf";
 
 	// Load in a model
-	Model model((parentDir + modelPath).c_str());
+	Model model((parentDir + treesPath).c_str());
+	Model model2((parentDir + groundPath).c_str());
 
 	// Original code from the tutorial
 	// Model model("models/bunny/scene.gltf");
@@ -88,7 +90,7 @@ int main()
 	while (!glfwWindowShouldClose(window))
 	{
 		// Specify the color of the background
-		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+		glClearColor(0.85f, 0.85f, 0.90f, 1.0f);
 		// Clean the back buffer and depth buffer
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -99,6 +101,7 @@ int main()
 
 		// Draw a model
 		model.Draw(shaderProgram, camera);
+		model2.Draw(shaderProgram, camera);
 
 		// Swap the back buffer with the front buffer
 		glfwSwapBuffers(window);
