@@ -50,6 +50,7 @@ int main()
 	
 	
 	Shader outliningProgram("C:/Users/Daniel/Desktop/VFX/GraphicsEngine/OpenGLEngine/shaders/outliningVert.glsl", "C:/Users/Daniel/Desktop/VFX/GraphicsEngine/OpenGLEngine/shaders/outliningFrag.glsl");
+	Shader grassProgram("C:/Users/Daniel/Desktop/VFX/GraphicsEngine/OpenGLEngine/shaders/vert.glsl", "C:/Users/Daniel/Desktop/VFX/GraphicsEngine/OpenGLEngine/shaders/transfrag.glsl");
 
 
 
@@ -64,7 +65,9 @@ int main()
 	glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 
 
-
+	grassProgram.Activate();
+	glUniform4f(glGetUniformLocation(grassProgram.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
+	glUniform3f(glGetUniformLocation(grassProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 
 
 	// Enables the Depth Buffer
@@ -89,13 +92,13 @@ int main()
 	* Also note that this requires C++17, so go to Project Properties, C/C++, Language, and select C++17
 	*/
 	std::string parentDir = (fs::current_path().fs::path::parent_path()).string();
-	std::string crowPath = "/resources/crow/scene.gltf";
-	std::string crowOutPath = "/resources/crow-outline/scene.gltf";
+	std::string ground = "/resources/ground/scene.gltf";
+	std::string grass = "/resources/grass/scene.gltf";
 
 
 	// Load in a model
-	Model model((parentDir + crowPath).c_str());
-	Model outline((parentDir + crowOutPath).c_str());
+	Model model((parentDir + ground).c_str());
+	Model grassM((parentDir + grass).c_str());
 
 
 	
@@ -139,23 +142,28 @@ int main()
 		camera.updateMatrix(45.0f, 0.1f, 100.0f);
 
 
-		glStencilFunc(GL_ALWAYS, 1, 0xFF);
-		glStencilMask(0xFF);
+		//glStencilFunc(GL_ALWAYS, 1, 0xFF);
+		//glStencilMask(0xFF);
+
+
 		// Draw a model
 		model.Draw(shaderProgram, camera);
+		glDisable(GL_CULL_FACE);
+		grassM.Draw(grassProgram, camera);
+		glEnable(GL_CULL_FACE);
 
-		glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-		glStencilMask(0x00);
-		glDisable(GL_DEPTH_TEST);
+		//glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+		//glStencilMask(0x00);
+		//glDisable(GL_DEPTH_TEST);
 		//outliningProgram.Activate();
 		//glUniform1d(glGetUniformLocation(outliningProgram.ID, "outlining"), 1.08f);
 		
 		//outline.Draw(outliningProgram, camera);
 
 
-		glStencilMask(0xFF);
-		glStencilFunc(GL_ALWAYS, 0, 0xFF);
-		glEnable(GL_DEPTH_TEST);
+		//glStencilMask(0xFF);
+		//glStencilFunc(GL_ALWAYS, 0, 0xFF);
+		//glEnable(GL_DEPTH_TEST);
 
 		// Swap the back buffer with the front buffer
 		glfwSwapBuffers(window);
@@ -167,6 +175,8 @@ int main()
 
 	// Delete all the objects we've created
 	shaderProgram.Delete();
+	grassProgram.Delete();
+	outliningProgram.Delete();
 	// Delete window before ending the program
 	glfwDestroyWindow(window);
 	// Terminate GLFW before ending the program
