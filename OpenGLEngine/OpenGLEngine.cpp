@@ -47,6 +47,11 @@ int main()
 
 	// Generates Shader object using shaders default.vert and default.frag
 	Shader shaderProgram("C:/Users/Daniel/Desktop/VFX/GraphicsEngine/OpenGLEngine/shaders/vert.glsl", "C:/Users/Daniel/Desktop/VFX/GraphicsEngine/OpenGLEngine/shaders/frag.glsl");
+	
+	
+	Shader outliningProgram("C:/Users/Daniel/Desktop/VFX/GraphicsEngine/OpenGLEngine/shaders/outliningVert.glsl", "C:/Users/Daniel/Desktop/VFX/GraphicsEngine/OpenGLEngine/shaders/outliningFrag.glsl");
+
+
 
 	// Take care of all the light related things
 	glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -64,6 +69,14 @@ int main()
 
 	// Enables the Depth Buffer
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_STENCIL_TEST);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
+	//Enables Face Culling
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_FRONT);
+	glFrontFace(GL_CCW);
+
 
 	// Creates camera object
 	Camera camera(width, height, glm::vec3(0.0f, 0.0f, 2.0f));
@@ -76,32 +89,73 @@ int main()
 	* Also note that this requires C++17, so go to Project Properties, C/C++, Language, and select C++17
 	*/
 	std::string parentDir = (fs::current_path().fs::path::parent_path()).string();
-	std::string treesPath = "/resources/trees/scene.gltf";
-	std::string groundPath = "/resources/ground/scene.gltf";
+	std::string crowPath = "/resources/crow/scene.gltf";
+	std::string crowOutPath = "/resources/crow-outline/scene.gltf";
+
 
 	// Load in a model
-	Model model((parentDir + treesPath).c_str());
-	Model model2((parentDir + groundPath).c_str());
+	Model model((parentDir + crowPath).c_str());
+	Model outline((parentDir + crowOutPath).c_str());
 
-	// Original code from the tutorial
-	// Model model("models/bunny/scene.gltf");
+
+	
+	double previousTime = 0.0f;
+	double currentTime = 0.0f;
+	double timeDiff;
+	unsigned int frames = 0;
+
+
+	//Deactivate vSync
+	//glfwSwapInterval(0);
 
 	// Main while loop
 	while (!glfwWindowShouldClose(window))
 	{
+		currentTime = glfwGetTime();
+		timeDiff = currentTime - previousTime;
+		frames++;
+		if (timeDiff >= 1.0 / 30.0)
+		{
+			std::string FPS = std::to_string((1/timeDiff)*frames);
+			std::string ms = std::to_string((timeDiff/frames )*1000);
+			std::string title = "OpenGL | FPS: " + FPS + " | ms: " + ms;
+			glfwSetWindowTitle(window, title.c_str());
+			previousTime = currentTime;
+			frames = 0;
+
+			// Handles camera inputs
+			camera.Inputs(window);
+		}
+
+
+
 		// Specify the color of the background
 		glClearColor(0.85f, 0.85f, 0.90f, 1.0f);
 		// Clean the back buffer and depth buffer
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT| GL_STENCIL_BUFFER_BIT);
 
-		// Handles camera inputs
-		camera.Inputs(window);
+		
 		// Updates and exports the camera matrix to the Vertex Shader
 		camera.updateMatrix(45.0f, 0.1f, 100.0f);
 
+
+		glStencilFunc(GL_ALWAYS, 1, 0xFF);
+		glStencilMask(0xFF);
 		// Draw a model
 		model.Draw(shaderProgram, camera);
-		model2.Draw(shaderProgram, camera);
+
+		glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+		glStencilMask(0x00);
+		glDisable(GL_DEPTH_TEST);
+		//outliningProgram.Activate();
+		//glUniform1d(glGetUniformLocation(outliningProgram.ID, "outlining"), 1.08f);
+		
+		//outline.Draw(outliningProgram, camera);
+
+
+		glStencilMask(0xFF);
+		glStencilFunc(GL_ALWAYS, 0, 0xFF);
+		glEnable(GL_DEPTH_TEST);
 
 		// Swap the back buffer with the front buffer
 		glfwSwapBuffers(window);
